@@ -1,0 +1,387 @@
+:root {
+  /* Surfaces */
+  --surface-0: #F7F6F3;
+  --surface-1: #FFFFFF;
+  --surface-2: #EFEDE7;
+
+  /* Text */
+  --text-primary: #1C2029;
+  --text-secondary: #5C6270;
+  --text-muted: #9297A3;
+
+  /* Borders */
+  --border: #E4E1D9;
+  --border-strong: #D3CFC4;
+
+  /* Brand: deep ink navy + warm gold accent (academic, trustworthy, a little warmth) */
+  --ink: #1B2A4A;
+  --ink-light: #26375E;
+  --accent: #C9932E;
+  --accent-dark: #A97A22;
+  --accent-bg: #FBF1DD;
+  --accent-text: #7A5A16;
+
+  /* Functional colors */
+  --success: #2F6B3A;
+  --success-bg: #E7F2E5;
+  --warning: #A24B1F;
+  --warning-bg: #FBEAE0;
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 20px;
+
+  --shadow-sm: 0 1px 2px rgba(28, 32, 41, 0.06);
+  --shadow-md: 0 4px 16px rgba(28, 32, 41, 0.08);
+  --shadow-lg: 0 12px 40px rgba(28, 32, 41, 0.14);
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+input, select, button, textarea {
+  font-family: inherit;
+  font-size: 14px;
+}
+
+input, select {
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(27, 42, 74, 0.1);
+}
+
+button {
+  cursor: pointer;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  padding: 10px 18px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--ink);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--ink);
+  color: white;
+  border: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--ink-light);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-accent {
+  background: var(--accent);
+  color: var(--ink);
+  font-weight: 600;
+  border: none;
+}
+
+.btn-accent:hover:not(:disabled) { background: var(--accent-dark); color: white; }
+
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.card-row:hover { box-shadow: var(--shadow-md); }
+
+a { color: var(--ink); text-decoration: none; font-weight: 500; }
+a:hover { color: var(--accent-dark); }
+
+/* ---------------------------------------------------------------------
+   Dashboard chrome (admin / prof) — page header, section headers, stat
+   cards, badges, empty states. Reuses the existing tokens above so it
+   stays visually consistent with the rest of the app.
+------------------------------------------------------------------------ */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.page-header__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: var(--radius);
+  background: var(--ink);
+  color: var(--accent);
+}
+
+.page-header h1 {
+  font-size: 26px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.15;
+}
+
+.page-header p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 2px 0 0;
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.section-header__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  border-radius: 7px;
+  background: var(--accent-bg);
+  color: var(--accent-text);
+}
+
+.section-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.section-header p {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 3px 0 0;
+  max-width: 60ch;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+.stat-card--warning { background: var(--warning-bg); border-color: transparent; }
+
+.stat-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  background: var(--accent-bg);
+  color: var(--accent-text);
+}
+
+.stat-card--warning .stat-card__icon { background: rgba(255, 255, 255, 0.55); color: var(--warning); }
+
+.stat-card__label { font-size: 12px; color: var(--text-secondary); margin: 0; }
+.stat-card--warning .stat-card__label { color: var(--warning); }
+
+.stat-card__value {
+  font-size: 21px;
+  font-weight: 600;
+  margin: 3px 0 0;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+.stat-card--warning .stat-card__value { color: var(--warning); }
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 20px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 13px;
+  background: var(--surface-1);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.badge-accent { background: var(--accent-bg); color: var(--accent-text); }
+.badge-warning { background: var(--warning-bg); color: var(--warning); }
+.badge-success { background: var(--success-bg); color: var(--success); }
+.badge-muted { background: var(--surface-2); color: var(--text-secondary); }
+
+.today-card {
+  border-color: var(--accent) !important;
+  background: linear-gradient(135deg, var(--accent-bg) 0%, var(--surface-1) 55%);
+}
+
+.subject-badge:hover {
+  border-color: var(--ink) !important;
+  transform: translateY(-2px);
+  color: var(--ink) !important;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+/* Grille de tarifs — 4 colonnes desktop / 2 tablette / 1 mobile.
+   PricingCard est en display:flex column pour que le bouton "Choisir"
+   reste aligné en bas de chaque carte, quelle que soit la longueur du
+   contenu au-dessus. */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.pricing-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 900px) {
+  .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .pricing-grid { grid-template-columns: 1fr; }
+}
+
+::selection { background: var(--accent-bg); color: var(--text-primary); }
+
+/* Animation de chargement (skeleton) — voir components/Skeleton.jsx */
+.skeleton-shimmer {
+  background: linear-gradient(90deg, var(--surface-2, #eee) 25%, var(--border, #e2e2e2) 37%, var(--surface-2, #eee) 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+}
+@keyframes skeleton-shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer { animation: none; opacity: 0.6; }
+}
+
+/* ---------------------------------------------------------------------
+   Responsive — mobile & tablette. Le système de design (couleurs, police,
+   composants .card/.btn-primary/etc.) reste identique partout ; ces
+   règles ajustent seulement l'espacement, la taille de police, et la nav
+   (bascule vers un menu burger) pour les petits écrans.
+------------------------------------------------------------------------ */
+@media (max-width: 860px) {
+  .navbar-links-desktop { display: none !important; }
+  .navbar-burger { display: flex !important; }
+  .navbar-inner { padding: 0.85rem 1.25rem !important; }
+  .grid-2col-stack { grid-template-columns: 1fr !important; }
+}
+
+@media (min-width: 861px) {
+  .navbar-links-mobile { display: none !important; }
+}
+
+@media (max-width: 640px) {
+  .container { padding: 1.5rem 1.1rem; }
+
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.2rem !important; }
+
+  .card { padding: 1.1rem; }
+
+  /* Toute rangée de champs côte à côte (formulaires, filtres) s'empile
+     verticalement — les composants qui utilisent déjà `display:flex`
+     inline (Register.jsx, Catalog.jsx...) en bénéficient automatiquement
+     sans devoir toucher à chaque fichier individuellement. */
+  .stack-on-mobile { flex-direction: column !important; }
+
+  table { font-size: 13px; }
+}
