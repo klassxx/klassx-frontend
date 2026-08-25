@@ -1,11 +1,19 @@
+import { Link } from "react-router-dom";
+
 // Carte enseignant publique — utilisée sur la page d'accueil (aperçu) et
 // sur la page "Nos Enseignants" (liste complète), pour garder un seul
 // composant à faire évoluer. Attend un objet au format renvoyé par
 // GET /api/public/teachers/ (voir PublicTeacherSerializer côté backend) :
 // { id, full_name, photo, subject_name, title_degree, bio_short }.
+// Cliquable — mène à la fiche détaillée (/nos-enseignants/:id, voir
+// TeacherDetail.jsx), qui affiche en plus la biographie complète.
 export default function TeacherCard({ teacher }) {
   return (
-    <div className="card" style={{ textAlign: "center" }}>
+    <Link
+      to={`/nos-enseignants/${teacher.id}`}
+      className="card"
+      style={{ textAlign: "center", display: "block", color: "inherit", textDecoration: "none" }}
+    >
       <div
         style={{
           width: 84,
@@ -38,6 +46,6 @@ export default function TeacherCard({ teacher }) {
           « {teacher.bio_short} »
         </p>
       )}
-    </div>
+    </Link>
   );
 }

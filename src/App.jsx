@@ -5,6 +5,7 @@ import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import OurTeachers from "./pages/OurTeachers";
+import TeacherDetail from "./pages/TeacherDetail";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -26,6 +27,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/nos-enseignants" element={<OurTeachers />} />
+          <Route path="/nos-enseignants/:id" element={<TeacherDetail />} />
           <Route path="/connexion" element={<Login />} />
           <Route path="/inscription" element={<Register />} />
           <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />

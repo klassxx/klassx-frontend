@@ -102,6 +102,7 @@ export const api = {
 
   // --- Public landing page (no auth needed) ---
   publicTeachers: () => apiFetch("/public/teachers/"),
+  publicTeacherDetail: (id) => apiFetch(`/public/teachers/${id}/`),
   publicPricing: () => apiFetch("/public/pricing/"),
   publicFAQ: () => apiFetch("/public/faq/"),
   staticPage: (slug) => apiFetch(`/public/pages/${slug}/`),
