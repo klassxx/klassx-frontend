@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../api/client";
 import { useAuth } from "../api/AuthContext";
 import ParisDateTimePicker from "../components/ParisDateTimePicker";
@@ -37,6 +37,14 @@ const STATUS_LABELS = {
   cancelled: "Annulé",
 };
 
+// Conserve la sélection en cours (matière/forfait/etc.) le temps d'un
+// aller-retour par /inscription ou /connexion quand l'élève n'a pas
+// encore de compte — voir handleSubmitGroup/handleSubmitIndividual et
+// l'effet de restauration plus bas. sessionStorage plutôt que
+// localStorage : ça n'a de sens que pour la session de navigation en
+// cours, pas la peine de la faire survivre indéfiniment sur l'appareil.
+const PENDING_BOOKING_KEY = "klassx_pending_booking";
+
 /**
  * Two very different booking paths live on this page:
  * - Group tiers (10/5/3): the student requests a subject + level + weekly-
@@ -53,6 +61,15 @@ const STATUS_LABELS = {
 export default function Catalog() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Présent quand on arrive depuis la fiche d'un enseignant
+  // ("Réserver un cours avec X" — voir TeacherDetail.jsx). Purement
+  // informatif pour l'instant : envoyé avec la demande de groupe pour
+  // qu'un admin voie la préférence dans /admin, mais n'assigne rien
+  // automatiquement — l'individuel n'a pas encore ce même mécanisme
+  // (pas de champ équivalent côté backend, voir IndividualBookingSerializer).
+  const preferredTeacherId = searchParams.get("enseignant") || "";
+  const preferredTeacherName = searchParams.get("nom") || "";
 
   const [subjects, setSubjects] = useState([]);
   const [pricing, setPricing] = useState([]);
@@ -82,6 +99,52 @@ export default function Catalog() {
   const [loading, setLoading] = useState(true);
 
   const isIndividual = groupTier === "INDIVIDUAL";
+
+  function savePendingBooking() {
+    try {
+      const pending = isIndividual
+        ? { type: "individual", subjectId, level, individualDate, individualDuration }
+        : { type: "group", subjectId, level, groupTier, weeklyHours };
+      sessionStorage.setItem(PENDING_BOOKING_KEY, JSON.stringify(pending));
+    } catch {
+      // sessionStorage indisponible (navigation privée stricte, etc.) —
+      // tant pis, l'élève devra juste re-choisir après son inscription.
+    }
+  }
+
+  // Au retour d'un aller-retour /inscription ou /connexion (voir
+  // savePendingBooking ci-dessus), restaure la sélection dès qu'un
+  // compte est disponible, plutôt que de laisser l'élève tout re-choisir.
+  useEffect(() => {
+    if (!user) return;
+    let raw;
+    try {
+      raw = sessionStorage.getItem(PENDING_BOOKING_KEY);
+    } catch {
+      return;
+    }
+    if (!raw) return;
+    sessionStorage.removeItem(PENDING_BOOKING_KEY);
+    try {
+      const pending = JSON.parse(raw);
+      if (pending.subjectId) {
+        subjectTouchedRef.current = true;
+        setSubjectId(pending.subjectId);
+      }
+      if (pending.level) setLevel(pending.level);
+      if (pending.type === "individual") {
+        setGroupTier("INDIVIDUAL");
+        if (pending.individualDate) setIndividualDate(pending.individualDate);
+        if (pending.individualDuration) setIndividualDuration(pending.individualDuration);
+      } else {
+        if (pending.groupTier) setGroupTier(pending.groupTier);
+        if (pending.weeklyHours) setWeeklyHours(pending.weeklyHours);
+      }
+      setMessage("Votre sélection a été conservée — vérifiez et confirmez ci-dessous.");
+    } catch {
+      // JSON malformé — on ignore simplement, rien de grave.
+    }
+  }, [user]);
 
   useEffect(() => {
     api
@@ -178,6 +241,7 @@ export default function Catalog() {
   async function handleSubmitGroup(e) {
     e.preventDefault();
     if (!user) {
+      savePendingBooking();
       setNeedsAuth(true);
       return;
     }
@@ -191,6 +255,7 @@ export default function Catalog() {
         level,
         group_tier: groupTier,
         weekly_hours: weeklyHours,
+        ...(preferredTeacherId ? { preferred_teacher: preferredTeacherId } : {}),
       });
       setMyRequests((prev) => [created, ...prev]);
       if (user.student_profile?.has_payment_method) {
@@ -222,6 +287,7 @@ export default function Catalog() {
   async function handleSubmitIndividual(e) {
     e.preventDefault();
     if (!user) {
+      savePendingBooking();
       setNeedsAuth(true);
       return;
     }
@@ -241,6 +307,7 @@ export default function Catalog() {
         level,
         start_time: startIso,
         end_time: end.toISOString(),
+        ...(preferredTeacherId ? { preferred_teacher: preferredTeacherId } : {}),
       });
       if (data.checkout_url) {
         window.location.href = data.checkout_url;
@@ -321,6 +388,21 @@ export default function Catalog() {
           {isIndividual ? "Réserver une séance individuelle" : "Demander une place en groupe"}
         </p>
 
+        {preferredTeacherId && (
+          <p
+            style={{
+              fontSize: 13,
+              color: "var(--accent-text)",
+              background: "var(--accent-bg)",
+              borderRadius: 8,
+              padding: "8px 12px",
+              margin: "0 0 16px",
+            }}
+          >
+            ✓ Votre préférence pour <strong>{preferredTeacherName || "cet enseignant"}</strong> sera transmise avec votre {isIndividual ? "réservation" : "demande"}.
+          </p>
+        )}
+
         {!user && (
           <>
             <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>
@@ -344,9 +426,9 @@ export default function Catalog() {
         </label>
         {availableSubjects.length === 0 ? (
           <p style={{ fontSize: 13, color: "var(--warning)", margin: "0 0 14px" }}>
-            {effectiveBacType === "general"
-              ? "Aucune matière disponible pour ce niveau — avez-vous renseigné vos spécialités ? Vous pouvez les modifier depuis votre tableau de bord."
-              : "Aucune matière n'est encore disponible pour cette filière sur KLASSX. Contactez-nous si vous pensez qu'il s'agit d'une erreur."}
+            {user && effectiveBacType === "general"
+              ? "Aucune matière disponible pour vos spécialités actuelles — renseignez-les depuis votre tableau de bord pour voir vos matières."
+              : "Cette combinaison filière/niveau n'est pas encore couverte par nos cours en ligne — écris-nous et on s'organise pour toi."}
           </p>
         ) : (
           <select
@@ -480,11 +562,11 @@ export default function Catalog() {
               <button
                 type="button"
                 className="btn-primary"
-                onClick={() => navigate("/inscription")}
+                onClick={() => navigate("/inscription?next=/catalogue")}
               >
                 Créer un compte
               </button>
-              <button type="button" onClick={() => navigate("/connexion")}>
+              <button type="button" onClick={() => navigate("/connexion?next=/catalogue")}>
                 J'ai déjà un compte
               </button>
             </div>

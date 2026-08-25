@@ -61,12 +61,23 @@ export default function TeacherDetail() {
             )}
           </div>
 
-          <h1 style={{ fontSize: 28, fontWeight: 600, margin: "0 0 6px" }}>{teacher.full_name}</h1>
+          <h1 style={{ fontSize: 28, fontWeight: 600, margin: "0 0 10px" }}>{teacher.full_name}</h1>
 
           {teacher.subject_name && (
-            <p style={{ fontSize: 14, color: "var(--accent)", fontWeight: 600, margin: "0 0 4px" }}>
+            <span
+              style={{
+                display: "inline-block",
+                fontSize: 13,
+                fontWeight: 600,
+                color: "var(--ink)",
+                background: "var(--accent)",
+                padding: "4px 14px",
+                borderRadius: 999,
+                margin: "0 0 10px",
+              }}
+            >
               {teacher.subject_name}
-            </p>
+            </span>
           )}
 
           {teacher.title_degree && (
@@ -88,7 +99,7 @@ export default function TeacherDetail() {
           )}
 
           {teacher.bio && (
-            <div style={{ textAlign: "left" }} className="card">
+            <div style={{ textAlign: "left", borderLeft: "3px solid var(--accent)" }} className="card">
               <p style={{ fontSize: 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, margin: "0 0 12px", color: "var(--text-muted)" }}>
                 À propos
               </p>
@@ -97,6 +108,12 @@ export default function TeacherDetail() {
               </p>
             </div>
           )}
+
+          <Link to={`/catalogue?enseignant=${teacher.id}&nom=${encodeURIComponent(teacher.full_name)}`} style={{ display: "inline-block", marginTop: 32 }}>
+            <button className="btn-primary">
+              Réserver un cours avec {teacher.full_name.split(" ")[0]}
+            </button>
+          </Link>
         </div>
       )}
     </div>
