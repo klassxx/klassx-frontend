@@ -25,13 +25,11 @@ const TIER_CAPACITY = {
 
 // Mirrors core/pricing.py: WEEKLY_HOURS_LABELS
 const WEEKLY_HOURS_LABELS = {
-  1: "4h/mois",
-  2: "8h/mois",
-  6: "6h/semaine",
-  8: "8h/semaine",
-  12: "12h/semaine",
-  16: "16h/semaine",
-  24: "24h/semaine",
+  4: "1h/semaine (4h/mois)",
+  6: "1,5h/semaine (6h/mois)",
+  8: "2h/semaine (8h/mois)",
+  12: "3h/semaine (12h/mois)",
+  16: "4h/semaine (16h/mois)",
 };
 
 // "2026-08" — mois courant, format attendu par l'API et par <input type="month">.
@@ -440,7 +438,7 @@ function GroupSummaryRow({ group, requests, teachers, onScheduled, onError }) {
             <span className="badge badge-accent">{TIER_LABELS[group.group_tier]}</span>
             {group.weekly_hours && (
               <span className="badge badge-muted">
-                {WEEKLY_HOURS_LABELS[group.weekly_hours] || `${group.weekly_hours}h/semaine`}
+                {WEEKLY_HOURS_LABELS[group.weekly_hours] || `${group.weekly_hours}h/mois`}
               </span>
             )}
           </p>

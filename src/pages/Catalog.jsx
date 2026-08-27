@@ -17,17 +17,15 @@ const TIER_LABELS = {
   INDIVIDUAL: "Individuel",
 };
 
-// Mirrors core/pricing.py: WEEKLY_HOURS_LABELS — the two lightest packages
-// are labelled by their monthly total (4h/8h par mois) since that reads
-// more naturally at that size; the rest by their weekly commitment.
+// Mirrors core/pricing.py: WEEKLY_HOURS_LABELS — every package shows
+// both the weekly commitment and the monthly total, since the field
+// itself stores the monthly total (see core/models.py: GroupRequest.WeeklyHours).
 const WEEKLY_HOURS_LABELS = {
-  1: "4h/mois",
-  2: "8h/mois",
-  6: "6h/semaine",
-  8: "8h/semaine",
-  12: "12h/semaine",
-  16: "16h/semaine",
-  24: "24h/semaine",
+  4: "1h/semaine (4h/mois)",
+  6: "1,5h/semaine (6h/mois)",
+  8: "2h/semaine (8h/mois)",
+  12: "3h/semaine (12h/mois)",
+  16: "4h/semaine (16h/mois)",
 };
 const WEEKLY_HOURS_OPTIONS = Object.keys(WEEKLY_HOURS_LABELS).map(Number);
 
@@ -511,14 +509,14 @@ export default function Catalog() {
               {isTunisia ? (
                 <>
                   Formule : <strong>{TIER_LABELS[groupTier]}</strong> ({ratesByTierTnd[groupTier]} DT/h) — soit
-                  environ <strong>{(weeklyHours * (ratesByTierTnd[groupTier] || 0) * 4).toFixed(2)} DT/mois</strong>.
+                  environ <strong>{(weeklyHours * (ratesByTierTnd[groupTier] || 0)).toFixed(2)} DT/mois</strong>.
                   Paiement mensuel via Konnect — contrairement à la carte bancaire internationale, il n'y a pas de
                   prélèvement automatique : il faudra relancer le paiement chaque mois depuis votre tableau de bord.
                 </>
               ) : (
                 <>
                   Formule : <strong>{TIER_LABELS[groupTier]}</strong> ({ratesByTier[groupTier]}€/h) — soit environ{" "}
-                  <strong>{(weeklyHours * (ratesByTier[groupTier] || 0) * 4).toFixed(2)} €/mois</strong>. Facturation
+                  <strong>{(weeklyHours * (ratesByTier[groupTier] || 0)).toFixed(2)} €/mois</strong>. Facturation
                   mensuelle, reconduite automatiquement ; un changement ou une annulation prend effet le mois
                   suivant.
                 </>
