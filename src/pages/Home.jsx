@@ -376,13 +376,43 @@ function StepCard({ number, title, text }) {
 }
 
 function PricingCard({ plan }) {
+  const hasDiscount = plan.discount_percentage > 0;
   return (
     <div
       className="card pricing-card"
       style={{ textAlign: "center", display: "flex", flexDirection: "column" }}
     >
       <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 8px" }}>{plan.group_tier_display}</p>
+      {hasDiscount && (
+        <span
+          style={{
+            display: "inline-block",
+            fontSize: 11,
+            fontWeight: 700,
+            color: "var(--ink)",
+            background: "var(--accent)",
+            borderRadius: 999,
+            padding: "2px 10px",
+            margin: "0 0 6px",
+          }}
+        >
+          -{plan.discount_percentage}%
+        </span>
+      )}
       <p style={{ fontSize: 26, fontWeight: 700, margin: "0 0 4px" }}>
+        {hasDiscount && (
+          <span
+            style={{
+              fontSize: 15,
+              fontWeight: 400,
+              color: "var(--text-muted)",
+              textDecoration: "line-through",
+              marginRight: 6,
+            }}
+          >
+            {plan.original_price_per_hour_eur.toFixed(2).replace(".00", "")}€
+          </span>
+        )}
         {plan.price_per_hour_eur.toFixed(2).replace(".00", "")}€
         <span style={{ fontSize: 13, fontWeight: 400, color: "var(--text-muted)" }}>/heure</span>
       </p>

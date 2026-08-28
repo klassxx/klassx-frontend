@@ -85,6 +85,26 @@ export default function Catalog() {
   const [weeklyHours, setWeeklyHours] = useState(6);
   const [individualDate, setIndividualDate] = useState("");
   const [individualDuration, setIndividualDuration] = useState(60);
+  const [promoCode, setPromoCode] = useState("");
+  // idle | checking | valid | invalid
+  const [promoStatus, setPromoStatus] = useState("idle");
+  const [promoPercentage, setPromoPercentage] = useState(0);
+  const [promoMessage, setPromoMessage] = useState("");
+
+  async function handleCheckPromoCode() {
+    if (!promoCode.trim()) return;
+    setPromoStatus("checking");
+    try {
+      const data = await api.validatePromoCode(promoCode.trim());
+      setPromoStatus("valid");
+      setPromoPercentage(data.percentage);
+      setPromoMessage(`Code valide — -${data.percentage}% appliqué au paiement.`);
+    } catch (err) {
+      setPromoStatus("invalid");
+      setPromoPercentage(0);
+      setPromoMessage(err.message || "Ce code promo n'est pas valide.");
+    }
+  }
   const { day: individualDatePart, hour: individualHour, minute: individualMinute } = splitLocalDateTime(individualDate);
 
   const [myRequests, setMyRequests] = useState([]);
@@ -306,6 +326,7 @@ export default function Catalog() {
         start_time: startIso,
         end_time: end.toISOString(),
         ...(preferredTeacherId ? { preferred_teacher: preferredTeacherId } : {}),
+        ...(promoStatus === "valid" ? { promo_code: promoCode.trim() } : {}),
       });
       if (data.checkout_url) {
         window.location.href = data.checkout_url;
@@ -487,10 +508,48 @@ export default function Catalog() {
               style={{ marginBottom: 20 }}
             />
 
+            <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>
+              Code promo (facultatif)
+            </label>
+            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+              <input
+                type="text"
+                value={promoCode}
+                onChange={(e) => {
+                  setPromoCode(e.target.value);
+                  setPromoStatus("idle");
+                }}
+                placeholder="Ex: RENTREE2026"
+                style={{ flexGrow: 1 }}
+              />
+              <button type="button" onClick={handleCheckPromoCode} disabled={promoStatus === "checking" || !promoCode.trim()}>
+                Valider
+              </button>
+            </div>
+            {promoMessage && (
+              <p
+                style={{
+                  fontSize: 12,
+                  margin: "0 0 14px",
+                  color: promoStatus === "valid" ? "var(--accent-text)" : "var(--warning)",
+                }}
+              >
+                {promoMessage}
+              </p>
+            )}
+
             <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: "0 0 20px" }}>
               Prix de cette séance :{" "}
-              <strong>{isTunisia ? `${individualPriceTnd} DT` : `${individualPrice} €`}</strong> — paiement immédiat,
-              sans engagement.
+              <strong>
+                {promoStatus === "valid"
+                  ? isTunisia
+                    ? `${(individualPriceTnd * (1 - promoPercentage / 100)).toFixed(2)} DT`
+                    : `${(individualPrice * (1 - promoPercentage / 100)).toFixed(2)} €`
+                  : isTunisia
+                  ? `${individualPriceTnd} DT`
+                  : `${individualPrice} €`}
+              </strong>{" "}
+              — paiement immédiat, sans engagement.
             </p>
           </>
         ) : (

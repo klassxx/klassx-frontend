@@ -107,6 +107,7 @@ export const api = {
   publicFAQ: () => apiFetch("/public/faq/"),
   staticPage: (slug) => apiFetch(`/public/pages/${slug}/`),
   subscribeNewsletter: (email) => apiFetch("/public/newsletter/", { method: "POST", body: { email } }),
+  validatePromoCode: (code) => apiFetch("/public/promo-codes/validate/", { method: "POST", body: { code } }),
   me: () => apiFetch("/me/"),
   myReferrals: () => apiFetch("/me/referrals/"),
   myTeacherHours: (month) => apiFetch(`/me/teacher-hours/${month ? `?month=${month}` : ""}`),
