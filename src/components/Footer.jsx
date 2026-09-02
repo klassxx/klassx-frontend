@@ -92,7 +92,7 @@ export default function Footer() {
           />
           <FooterColumn
             title="Contact"
-            links={[{ to: "mailto:succes@reussir-mon-bac.com", label: "succes@reussir-mon-bac.com", external: true }]}
+            links={[{ to: "mailto:contact@klassx.cloud", label: "contact@klassx.cloud", external: true }]}
           />
         </div>
 

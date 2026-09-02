@@ -305,7 +305,7 @@ export default function Register() {
             }}
           >
             Le paiement en ligne n'est pas disponible en Tunisie pour le moment : après votre inscription,
-            contactez-nous à succes@reussir-mon-bac.com pour connaître les modalités de paiement par virement bancaire.
+            contactez-nous à contact@klassx.cloud pour connaître les modalités de paiement par virement bancaire.
           </p>
         )}
 
