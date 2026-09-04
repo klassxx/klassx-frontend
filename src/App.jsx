@@ -8,7 +8,6 @@ import OurTeachers from "./pages/OurTeachers";
 import TeacherDetail from "./pages/TeacherDetail";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import ReferralRedirect from "./pages/ReferralRedirect";
 import Whiteboard from "./pages/Whiteboard";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -32,7 +31,6 @@ export default function App() {
           <Route path="/nos-enseignants/:id" element={<TeacherDetail />} />
           <Route path="/connexion" element={<Login />} />
           <Route path="/inscription" element={<Register />} />
-          <Route path="/r/:code" element={<ReferralRedirect />} />
           <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
           <Route path="/mot-de-passe-oublie/confirmer" element={<ResetPassword />} />
           <Route path="/mentions-legales" element={<LegalPage slug="mentions-legales" />} />
