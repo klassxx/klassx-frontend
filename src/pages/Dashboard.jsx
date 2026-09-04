@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import { useAuth } from "../api/AuthContext";
 import SpecialtyChips from "../components/SpecialtyChips";
@@ -241,6 +242,11 @@ export default function Dashboard() {
                 <a href={session.meeting_url} target="_blank" rel="noreferrer">
                   <button className="btn-primary">Rejoindre</button>
                 </a>
+              )}
+              {!enrollment.waitlisted && enrollment.payment_status === "paid" && session?.id && (
+                <Link to={`/tableau/${session.id}`}>
+                  <button>Tableau</button>
+                </Link>
               )}
             </div>
           );

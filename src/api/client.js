@@ -172,6 +172,10 @@ export const api = {
 
   // --- Teacher ---
   mySessions: () => apiFetch("/class-sessions/mine/"),
+  getWhiteboard: (sessionId) => apiFetch(`/class-sessions/${sessionId}/whiteboard/`),
+  saveWhiteboard: (sessionId, pages) =>
+    apiFetch(`/class-sessions/${sessionId}/whiteboard/`, { method: "PUT", body: { pages } }),
+  getWhiteboardRoomCode: (sessionId) => apiFetch(`/class-sessions/${sessionId}/whiteboard-room-code/`),
   addExtraSession: (payload) => apiFetch("/class-sessions/add_extra_session/", { method: "POST", body: payload }),
   myTeacherSettings: () => apiFetch("/teachers/me/"),
   updateTeacherSettings: (payload) => apiFetch("/teachers/me/", { method: "PATCH", body: payload }),

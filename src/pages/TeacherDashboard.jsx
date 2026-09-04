@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import { useAuth } from "../api/AuthContext";
 import ReferralCard from "../components/ReferralCard";
@@ -257,6 +258,9 @@ export default function TeacherDashboard() {
                     <button className="btn-primary">Rejoindre</button>
                   </a>
                 )}
+                <Link to={`/tableau/${s.id}`}>
+                  <button>Tableau</button>
+                </Link>
                 <button onClick={() => setUploadTarget(s.id)}>Déposer un support</button>
               </div>
             </div>
