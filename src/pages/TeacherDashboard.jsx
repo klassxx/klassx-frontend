@@ -32,6 +32,7 @@ export default function TeacherDashboard() {
   const [message, setMessage] = useState("");
   const [googleNotice, setGoogleNotice] = useState("");
   const [myHours, setMyHours] = useState(null);
+  const [groupsError, setGroupsError] = useState(false);
 
   function loadAll() {
     api
@@ -40,8 +41,16 @@ export default function TeacherDashboard() {
       .catch(() => {});
     api
       .myGroupAssignments()
-      .then((data) => setAllGroups(data.results || data))
-      .catch(() => {});
+      .then((data) => {
+        setAllGroups(data.results || data);
+        setGroupsError(false);
+      })
+      // Avant, un échec ici (401, 500, panne réseau...) faisait
+      // simplement disparaître toute la section "Mes groupes" — y
+      // compris le bouton pour ajouter documents/vidéos/messages —
+      // sans aucune indication que quelque chose avait échoué. On ne
+      // pouvait pas distinguer "pas encore de groupe" d'un vrai bug.
+      .catch(() => setGroupsError(true));
     api
       .myTeacherSettings()
       .then(setSettings)
@@ -255,27 +264,37 @@ export default function TeacherDashboard() {
         </div>
       </div>
 
-      {allGroups.length > 0 && (
-        <div className="section">
-          <div className="section-header">
-            <div className="section-header__icon">
-              <IconGroup />
-            </div>
-            <div>
-              <h2>Mes groupes</h2>
-              <p>
-                Déposez des documents ou des liens vidéo, et écrivez des messages pour les élèves de chaque groupe —
-                tout est visible sur leur tableau de bord.
-              </p>
-            </div>
+      <div className="section">
+        <div className="section-header">
+          <div className="section-header__icon">
+            <IconGroup />
           </div>
+          <div>
+            <h2>Mes groupes</h2>
+            <p>
+              Déposez des documents ou des liens vidéo, et écrivez des messages pour les élèves de chaque groupe —
+              tout est visible sur leur tableau de bord.
+            </p>
+          </div>
+        </div>
+        {groupsError ? (
+          <p style={{ fontSize: 13, color: "var(--warning)" }}>
+            Impossible de charger vos groupes pour le moment. Rechargez la page — si ça persiste, contactez le
+            support.
+          </p>
+        ) : allGroups.length === 0 ? (
+          <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
+            Aucun groupe ne vous est assigné pour l'instant — ils apparaîtront ici dès qu'un admin vous en confie
+            un.
+          </p>
+        ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {allGroups.map((g) => (
               <GroupContentRow key={g.id} group={g} />
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {seriesGroups.length > 0 && (
         <div className="section">
