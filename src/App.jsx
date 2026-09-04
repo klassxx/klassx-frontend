@@ -81,6 +81,14 @@ export default function App() {
             }
           />
           <Route
+            path="/tableau-demo"
+            element={
+              <ProtectedRoute roles={["student", "teacher"]}>
+                <Whiteboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/parrainage"
             element={
               <ProtectedRoute roles={["affiliate", "student", "teacher", "admin"]}>

@@ -1354,34 +1354,54 @@
   window.addEventListener('message', async (event)=>{
     const msg = event.data;
     if(!msg || msg.kind !== 'klassx-init') return;
-    const { sessionId, accessToken, apiBase, role, studentName } = msg;
+    const { sessionId, accessToken, apiBase, role, studentName, mode } = msg;
+    const isPersonal = mode === 'personal';
+    // Tableau personnel de découverte (voir Whiteboard.jsx côté React) :
+    // /me/whiteboard/ au lieu de /class-sessions/{id}/whiteboard/, et
+    // aucune connexion live automatique — un tableau personnel n'a
+    // personne d'autre avec qui se synchroniser, contrairement à une
+    // vraie séance.
+    const whiteboardPath = isPersonal
+      ? '/me/whiteboard/'
+      : `/class-sessions/${sessionId}/whiteboard/`;
 
     async function apiCall(path, options={}){
       const res = await fetch(`${apiBase}${path}`, {
         ...options,
         headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json', ...(options.headers||{}) },
       });
-      if(!res.ok) throw new Error('Requête échouée : ' + res.status);
+      if(!res.ok){
+        if(res.status === 403){
+          const body = await res.json().catch(()=>({}));
+          throw new Error(body.detail || "Accès refusé.");
+        }
+        throw new Error('Requête échouée : ' + res.status);
+      }
       return res.json();
     }
 
-    // 1. Charge le contenu déjà sauvegardé pour cette séance (s'il y en a).
+    // 1. Charge le contenu déjà sauvegardé (s'il y en a).
     try{
-      const data = await apiCall(`/class-sessions/${sessionId}/whiteboard/`);
+      const data = await apiCall(whiteboardPath);
       if(data.pages && data.pages.length){
         liveApplyEvent({ kind:'full-sync', pages: data.pages, pageIndex: 0 });
       }
-    }catch(e){ showToast("Impossible de charger le tableau sauvegardé — on repart d'une page vierge."); }
+    }catch(e){
+      showToast(e.message || "Impossible de charger le tableau sauvegardé.");
+      if(isPersonal) return; // période d'essai expirée ou compte non autorisé — inutile de continuer
+    }
 
     // 2. Sauvegarde périodique + à la fermeture — jamais de perte de
     //    contenu, contrairement au comportement d'origine (rien n'était
     //    conservé après fermeture de l'onglet).
     async function saveNow(){
-      try{ await apiCall(`/class-sessions/${sessionId}/whiteboard/`, { method:'PUT', body: JSON.stringify({ pages: state.pages }) }); }
+      try{ await apiCall(whiteboardPath, { method:'PUT', body: JSON.stringify({ pages: state.pages }) }); }
       catch(e){ /* pas grave, on retentera au prochain cycle */ }
     }
     setInterval(saveNow, 20000);
     window.addEventListener('beforeunload', saveNow);
+
+    if(isPersonal) return; // pas de session live pour un tableau personnel
 
     // 3. Connexion automatique à la session live — code dérivé côté
     //    serveur pour cette séance précise (jamais tapé à la main, voir

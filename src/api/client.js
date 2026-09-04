@@ -176,6 +176,8 @@ export const api = {
   saveWhiteboard: (sessionId, pages) =>
     apiFetch(`/class-sessions/${sessionId}/whiteboard/`, { method: "PUT", body: { pages } }),
   getWhiteboardRoomCode: (sessionId) => apiFetch(`/class-sessions/${sessionId}/whiteboard-room-code/`),
+  getMyWhiteboard: () => apiFetch("/me/whiteboard/"),
+  saveMyWhiteboard: (pages) => apiFetch("/me/whiteboard/", { method: "PUT", body: { pages } }),
   addExtraSession: (payload) => apiFetch("/class-sessions/add_extra_session/", { method: "POST", body: payload }),
   myTeacherSettings: () => apiFetch("/teachers/me/"),
   updateTeacherSettings: (payload) => apiFetch("/teachers/me/", { method: "PATCH", body: payload }),

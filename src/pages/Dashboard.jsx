@@ -120,6 +120,9 @@ export default function Dashboard() {
             {user.student_profile.grade_level === "terminale" ? "Terminale" : "1ère"}
           </p>
         )}
+        <Link to="/tableau-demo">
+          <button style={{ marginTop: 10 }}>🖊️ Essayer le tableau interactif</button>
+        </Link>
       </div>
 
       {error && <p style={{ color: "var(--warning)" }}>{error}</p>}

@@ -19,6 +19,11 @@ export default function Whiteboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const iframeRef = useRef(null);
+  // Sans sessionId dans l'URL (/tableau-demo) → tableau personnel de
+  // découverte, sans lien avec une séance — voir MyWhiteboardView côté
+  // backend (limité à 14 jours pour un élève, permanent pour un
+  // enseignant).
+  const isPersonal = !sessionId;
 
   useEffect(() => {
     function handleMessage(event) {
@@ -27,6 +32,7 @@ export default function Whiteboard() {
       iframeRef.current.contentWindow.postMessage(
         {
           kind: "klassx-init",
+          mode: isPersonal ? "personal" : "session",
           sessionId,
           accessToken: localStorage.getItem("klassx_access"),
           apiBase: API_BASE,
@@ -38,7 +44,7 @@ export default function Whiteboard() {
     }
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [sessionId, user]);
+  }, [sessionId, isPersonal, user]);
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "#22352a", zIndex: 50 }}>

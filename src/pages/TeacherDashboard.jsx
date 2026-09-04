@@ -127,6 +127,10 @@ export default function TeacherDashboard() {
         </div>
       </div>
 
+      <Link to="/tableau-demo">
+        <button style={{ marginBottom: 24 }}>🖊️ Mon tableau personnel</button>
+      </Link>
+
       {myHours && (
         <section
           className="card"
