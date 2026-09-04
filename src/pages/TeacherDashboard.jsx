@@ -998,7 +998,7 @@ function TeacherProfileSettings({ settings, onChange, allSubjects }) {
           </label>
           <input
             type="text"
-            placeholder='Ex : "17 ans d\'exp. Éducation Nationale"'
+            placeholder={'Ex : "17 ans d\'exp. Éducation Nationale"'}
             value={titleDegree}
             onChange={(e) => setTitleDegree(e.target.value)}
             style={{ width: "100%" }}
