@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import { useAuth } from "../api/AuthContext";
 import ReferralCard from "../components/ReferralCard";
+import Skeleton from "../components/Skeleton";
 import ParisDateTimePicker from "../components/ParisDateTimePicker";
 import { parisWallTimeToUtcIso, splitLocalDateTime } from "../utils/parisTime";
 import {
