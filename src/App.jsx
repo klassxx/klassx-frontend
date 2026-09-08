@@ -9,9 +9,12 @@ import TeacherDetail from "./pages/TeacherDetail";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Whiteboard from "./pages/Whiteboard";
+import Blog from "./pages/Blog";
+import BlogPostPage from "./pages/BlogPostPage";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import LegalPage from "./pages/LegalPage";
+import AboutPage from "./pages/AboutPage";
 import Catalog from "./pages/Catalog";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -36,8 +39,11 @@ export default function App() {
           <Route path="/mentions-legales" element={<LegalPage slug="mentions-legales" />} />
           <Route path="/cgv" element={<LegalPage slug="cgv" />} />
           <Route path="/confidentialite" element={<LegalPage slug="confidentialite" />} />
+          <Route path="/a-propos" element={<AboutPage />} />
           <Route path="/catalogue" element={<Catalog />} />
           <Route path="/forum" element={<Forum />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route
             path="/capsules"
             element={

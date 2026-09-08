@@ -38,8 +38,12 @@ export default function TeacherCard({ teacher }) {
       {teacher.subject_name && (
         <p style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, margin: "0 0 6px" }}>{teacher.subject_name}</p>
       )}
-      {teacher.title_degree && (
-        <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 10px" }}>{teacher.title_degree}</p>
+      {(teacher.title_degree || teacher.years_of_experience != null) && (
+        <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 10px" }}>
+          {[teacher.title_degree, teacher.years_of_experience != null ? `${teacher.years_of_experience} ans d'expérience` : null]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
       )}
       {teacher.bio_short && (
         <p style={{ fontSize: 13, color: "var(--text-secondary)", fontStyle: "italic", lineHeight: 1.5, margin: 0 }}>

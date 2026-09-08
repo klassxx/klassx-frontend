@@ -366,6 +366,10 @@ export default function TeacherDashboard() {
           </div>
         )}
       </div>
+
+      <div style={{ marginTop: 24 }}>
+        <TeacherSelfStudyContent />
+      </div>
     </div>
   );
 }
@@ -913,6 +917,7 @@ function TeacherProfileSettings({ settings, onChange, allSubjects }) {
   const [bio, setBio] = useState(settings.bio || "");
   const [bioShort, setBioShort] = useState(settings.bio_short || "");
   const [titleDegree, setTitleDegree] = useState(settings.title_degree || "");
+  const [yearsOfExperience, setYearsOfExperience] = useState(settings.years_of_experience ?? "");
   const [subjectId, setSubjectId] = useState(settings.subject || "");
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
@@ -937,6 +942,7 @@ function TeacherProfileSettings({ settings, onChange, allSubjects }) {
       formData.append("bio", bio);
       formData.append("bio_short", bioShort);
       formData.append("title_degree", titleDegree);
+      if (yearsOfExperience !== "") formData.append("years_of_experience", yearsOfExperience);
       if (subjectId) formData.append("subject", subjectId);
       const updated = await api.updateTeacherSettings(formData);
       onChange(updated);
@@ -998,9 +1004,24 @@ function TeacherProfileSettings({ settings, onChange, allSubjects }) {
           </label>
           <input
             type="text"
-            placeholder={'Ex : "17 ans d\'exp. Éducation Nationale"'}
+            placeholder={'Ex : "Maîtrise de Lettres modernes"'}
             value={titleDegree}
             onChange={(e) => setTitleDegree(e.target.value)}
+            style={{ width: "100%" }}
+          />
+        </div>
+
+        <div>
+          <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>
+            Années d'expérience
+          </label>
+          <input
+            type="number"
+            min="0"
+            max="60"
+            placeholder="Ex : 23"
+            value={yearsOfExperience}
+            onChange={(e) => setYearsOfExperience(e.target.value)}
             style={{ width: "100%" }}
           />
         </div>
@@ -1037,6 +1058,191 @@ function TeacherProfileSettings({ settings, onChange, allSubjects }) {
         </button>
         {notice && <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: 0 }}>{notice}</p>}
       </form>
+    </div>
+  );
+}
+
+const STATUS_LABELS = {
+  approved: { label: "Approuvé", color: "var(--success, #2e7d32)" },
+  pending: { label: "En attente de validation", color: "var(--warning)" },
+  rejected: { label: "Refusé", color: "var(--error, #c0392b)" },
+};
+
+function TeacherSelfStudyContent() {
+  const [plans, setPlans] = useState([]);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [planId, setPlanId] = useState("");
+  const [contentType, setContentType] = useState("video");
+  const [title, setTitle] = useState("");
+  const [chapterName, setChapterName] = useState("");
+  const [month, setMonth] = useState("");
+  const [description, setDescription] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [pdfFile, setPdfFile] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    Promise.all([api.mySelfStudyPlans(), api.mySelfStudyContent()])
+      .then(([plansData, itemsData]) => {
+        const planList = plansData.results || plansData;
+        setPlans(planList);
+        setItems(itemsData.results || itemsData);
+        if (planList.length > 0) setPlanId(String(planList[0].id));
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!planId || !title || !month) {
+      setNotice("Matière, titre et mois sont obligatoires.");
+      return;
+    }
+    if (contentType === "pdf" && !pdfFile) {
+      setNotice("Sélectionnez un fichier PDF.");
+      return;
+    }
+    if (contentType === "video" && !videoUrl) {
+      setNotice("Indiquez le lien de la vidéo.");
+      return;
+    }
+    setSubmitting(true);
+    setNotice("");
+    try {
+      const formData = new FormData();
+      formData.append("plan", planId);
+      formData.append("content_type", contentType);
+      formData.append("title", title);
+      formData.append("chapter_name", chapterName);
+      formData.append("month", `${month}-01`);
+      formData.append("description", description);
+      if (contentType === "pdf") formData.append("pdf_file", pdfFile);
+      else formData.append("video_provider_id", videoUrl);
+
+      const created = await api.submitSelfStudyContent(formData);
+      setItems((prev) => [created, ...prev]);
+      setTitle("");
+      setChapterName("");
+      setDescription("");
+      setVideoUrl("");
+      setPdfFile(null);
+      setNotice("Contenu soumis — en attente de validation par l'équipe KLASSX.");
+    } catch (err) {
+      setNotice(err.message || "L'envoi a échoué.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (loading) return <Skeleton variant="rows" count={2} />;
+
+  return (
+    <div className="section">
+      <div className="section-header">
+        <div>
+          <h2>Mon contenu libre-service</h2>
+          <p>Déposez des vidéos ou des PDF pour l'abonnement de contenu en libre-service, sans accompagnement.</p>
+        </div>
+      </div>
+
+      {plans.length === 0 ? (
+        <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
+          Aucune matière ne vous est assignée pour l'instant pour ce service — contactez l'équipe KLASSX si vous
+          pensez que c'est une erreur.
+        </p>
+      ) : (
+        <>
+          <form onSubmit={handleSubmit} className="card" style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
+            <div>
+              <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Matière</label>
+              <select value={planId} onChange={(e) => setPlanId(e.target.value)} style={{ width: "100%" }}>
+                {plans.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ display: "flex", gap: 12 }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Type</label>
+                <select value={contentType} onChange={(e) => setContentType(e.target.value)} style={{ width: "100%" }}>
+                  <option value="video">Vidéo</option>
+                  <option value="pdf">PDF</option>
+                </select>
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Mois concerné</label>
+                <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} style={{ width: "100%" }} />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Titre</label>
+              <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%" }} />
+            </div>
+
+            <div>
+              <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Chapitre (optionnel)</label>
+              <input type="text" value={chapterName} onChange={(e) => setChapterName(e.target.value)} style={{ width: "100%" }} />
+            </div>
+
+            {contentType === "video" ? (
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Lien de la vidéo</label>
+                <input
+                  type="url"
+                  placeholder="https://..."
+                  value={videoUrl}
+                  onChange={(e) => setVideoUrl(e.target.value)}
+                  style={{ width: "100%" }}
+                />
+              </div>
+            ) : (
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Fichier PDF</label>
+                <input type="file" accept="application/pdf" onChange={(e) => setPdfFile(e.target.files?.[0] || null)} />
+              </div>
+            )}
+
+            <div>
+              <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Description (optionnel)</label>
+              <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} style={{ width: "100%", resize: "vertical" }} />
+            </div>
+
+            <button type="submit" className="btn-primary" disabled={submitting} style={{ alignSelf: "flex-start" }}>
+              {submitting ? "…" : "Soumettre pour validation"}
+            </button>
+            {notice && <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: 0 }}>{notice}</p>}
+          </form>
+
+          <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 8px" }}>Mes soumissions</p>
+          {items.length === 0 ? (
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Vous n'avez encore rien soumis.</p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {items.map((item) => {
+                const statusInfo = STATUS_LABELS[item.status] || STATUS_LABELS.pending;
+                return (
+                  <div key={item.id} className="card card-row">
+                    <div>
+                      <p style={{ fontSize: 13, fontWeight: 500, margin: 0 }}>
+                        {item.plan_name} · {item.title}
+                      </p>
+                      <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>
+                        {item.content_type === "video" ? "Vidéo" : "PDF"} — {item.month}
+                      </p>
+                    </div>
+                    <span style={{ fontSize: 12, fontWeight: 500, color: statusInfo.color }}>{statusInfo.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

@@ -78,6 +78,7 @@ export default function Footer() {
           <FooterColumn
             title="KLASSX"
             links={[
+              { to: "/a-propos", label: "À propos" },
               { to: "/catalogue", label: "Nos cours" },
               { to: "/inscription", label: "S'inscrire" },
             ]}

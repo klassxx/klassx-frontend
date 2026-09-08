@@ -81,7 +81,13 @@ export default function TeacherDetail() {
           )}
 
           {teacher.title_degree && (
-            <p style={{ fontSize: 14, color: "var(--text-muted)", margin: "0 0 20px" }}>{teacher.title_degree}</p>
+            <p style={{ fontSize: 14, color: "var(--text-muted)", margin: "0 0 6px" }}>{teacher.title_degree}</p>
+          )}
+
+          {teacher.years_of_experience != null && (
+            <p style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)", margin: "0 0 20px" }}>
+              {teacher.years_of_experience} ans d'expérience
+            </p>
           )}
 
           {teacher.bio_short && (

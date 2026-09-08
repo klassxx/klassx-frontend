@@ -55,6 +55,9 @@ export default function Navbar() {
           <Link to="/forum" style={linkStyle}>
             Forum
           </Link>
+          <Link to="/blog" style={linkStyle}>
+            Blog
+          </Link>
           {user ? (
             <>
               {user.role === "student" && (
@@ -133,6 +136,9 @@ export default function Navbar() {
           </Link>
           <Link to="/forum" onClick={closeMenu} style={{ ...linkStyle, padding: "10px 4px" }}>
             Forum
+          </Link>
+          <Link to="/blog" onClick={closeMenu} style={{ ...linkStyle, padding: "10px 4px" }}>
+            Blog
           </Link>
           {user ? (
             <>
