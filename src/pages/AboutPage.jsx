@@ -35,23 +35,14 @@ export default function AboutPage() {
           >
             {page.title}
           </h1>
-          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-            {page.content.split("\n\n").map((paragraph, i) => (
-              <p
-                key={i}
-                style={{
-                  fontSize: i === 0 ? 17 : 15,
-                  fontWeight: i === 0 ? 500 : 400,
-                  lineHeight: 1.8,
-                  color: i === 0 ? "var(--text-primary)" : "var(--text-secondary)",
-                  margin: 0,
-                  whiteSpace: "pre-wrap",
-                }}
-              >
-                {paragraph}
-              </p>
-            ))}
-          </div>
+          <div
+            style={{ fontSize: 15, lineHeight: 1.8, color: "var(--text-secondary)", display: "flex", flexDirection: "column", gap: 20 }}
+            // Contenu HTML complet, comme pour le blog — sûr uniquement
+            // parce que ce champ n'est modifiable que depuis l'admin
+            // (jamais par un élève ou un enseignant). Voir BlogPostPage.jsx
+            // pour la même logique appliquée aux articles.
+            dangerouslySetInnerHTML={{ __html: page.content }}
+          />
         </>
       )}
     </div>
