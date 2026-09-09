@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { HERO_IMAGE_URL } from "../config/media";
 import { api } from "../api/client";
 import TeacherCard from "../components/TeacherCard";
+import { toYoutubeEmbedUrl } from "../utils/youtube";
 
 /**
  * Hero background photo is set in src/config/media.js (HERO_IMAGE_URL) so
@@ -13,11 +14,13 @@ export default function Home() {
   const [teachers, setTeachers] = useState([]);
   const [pricing, setPricing] = useState([]);
   const [faqs, setFaqs] = useState([]);
+  const [promoVideos, setPromoVideos] = useState([]);
 
   useEffect(() => {
     api.publicTeachers().then((data) => setTeachers(data.results || data)).catch(() => {});
     api.publicPricing().then(setPricing).catch(() => {});
     api.publicFAQ().then((data) => setFaqs(data.results || data)).catch(() => {});
+    api.promoVideos().then((data) => setPromoVideos(data.results || data)).catch(() => {});
   }, []);
 
   return (
@@ -32,12 +35,12 @@ export default function Home() {
           justifyContent: "center",
           textAlign: "center",
           padding: "2rem 1.5rem",
-          backgroundImage: HERO_IMAGE_URL
-            ? `linear-gradient(180deg, rgba(20,30,54,0.72), rgba(20,30,54,0.86)), url(${HERO_IMAGE_URL})`
-            : "linear-gradient(135deg, #1B2A4A 0%, #26375E 55%, #3A4E7A 100%)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          color: "white",
+          // Fond clair uni — l'illustration (voir plus bas) a elle-même
+          // un fond crème, un fond sombre par-dessus la rendrait terne
+          // et effacerait ses couleurs. Coh\u00e9rent avec le reste du site
+          // (section "Pourquoi choisir KLASSX" juste en dessous).
+          background: "var(--surface-0, #F7F6F3)",
+          color: "var(--ink, #1B2A4A)",
         }}
       >
         <div style={{ maxWidth: 680 }}>
@@ -47,8 +50,7 @@ export default function Home() {
               fontWeight: 600,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              color: "#E8C670",
-              textShadow: "0 1px 8px rgba(0,0,0,0.4)",
+              color: "var(--accent-dark, #A97A22)",
               margin: "0 0 16px",
             }}
           >
@@ -59,7 +61,7 @@ export default function Home() {
               fontSize: "clamp(30px, 4.6vw, 48px)",
               fontWeight: 600,
               lineHeight: 1.15,
-              textShadow: "0 2px 12px rgba(0,0,0,0.35)",
+              color: "var(--ink, #1B2A4A)",
               margin: "0 0 20px",
             }}
           >
@@ -68,7 +70,7 @@ export default function Home() {
           <p
             style={{
               fontSize: 17,
-              color: "rgba(255,255,255,0.85)",
+              color: "var(--text-secondary, #5C6270)",
               margin: "0 0 32px",
               lineHeight: 1.6,
             }}
@@ -83,6 +85,15 @@ export default function Home() {
               Découvrir nos forfaits
             </button>
           </a>
+
+          {HERO_IMAGE_URL && (
+            <img
+              src={HERO_IMAGE_URL}
+              alt=""
+              className="hero-float-image"
+              style={{ maxWidth: 480, width: "100%", marginTop: 40 }}
+            />
+          )}
         </div>
       </section>
 
@@ -137,7 +148,7 @@ export default function Home() {
           <FeatureImageCard
             image="/images/features/programme-officiel.jpg"
             title="Programme officiel français"
-            description="Nos enseignants suivent le référentiel de l'Éducation nationale, en France comme en Tunisie."
+            description="Nos enseignants suivent le référentiel de l'Éducation nationale, en France comme au Canada."
           />
           <FeatureImageCard
             image="/images/features/grand-oral.jpg"
@@ -206,6 +217,38 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* --- Vidéos de présentation (gérées depuis l'admin) --- */}
+      {promoVideos.length > 0 && (
+        <section className="container">
+          <SectionHeading eyebrow="Découvrir" title="KLASSX en vidéo" />
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gap: 20,
+            }}
+          >
+            {promoVideos.map((video) => {
+              const embedUrl = toYoutubeEmbedUrl(video.video_url);
+              if (!embedUrl) return null;
+              return (
+                <div key={video.id}>
+                  <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 8px" }}>{video.title}</p>
+                  <div style={{ position: "relative", paddingTop: "56.25%", borderRadius: "var(--radius)", overflow: "hidden" }}>
+                    <iframe
+                      src={embedUrl}
+                      title={video.title}
+                      allowFullScreen
+                      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* --- Nos enseignants experts --- */}
       {teachers.length > 0 && (

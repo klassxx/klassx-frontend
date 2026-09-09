@@ -4,6 +4,7 @@ import { api } from "../api/client";
 import { useAuth } from "../api/AuthContext";
 import ParisDateTimePicker from "../components/ParisDateTimePicker";
 import Skeleton from "../components/Skeleton";
+import PaymentTrustBadge from "../components/PaymentTrustBadge";
 import { parisWallTimeToUtcIso, splitLocalDateTime } from "../utils/parisTime";
 
 const TIER_LABELS = {
@@ -633,6 +634,7 @@ export default function Catalog() {
         <button type="submit" className="btn-primary" style={{ width: "100%" }} disabled={submitting || !subjectId}>
           {submitting ? "Envoi…" : isIndividual ? "Réserver et payer" : "Demander une place"}
         </button>
+        {isIndividual && <PaymentTrustBadge />}
       </form>
 
       {user && !isIndividual && (

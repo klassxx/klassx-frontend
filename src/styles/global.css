@@ -361,6 +361,7 @@ a:hover { color: var(--accent-dark); }
 @media (max-width: 860px) {
   .navbar-links-desktop { display: none !important; }
   .navbar-burger { display: flex !important; }
+  .navbar-flag-mobile { display: flex !important; }
   .navbar-inner { padding: 0.85rem 1.25rem !important; }
   .grid-2col-stack { grid-template-columns: 1fr !important; }
 }
@@ -384,4 +385,28 @@ a:hover { color: var(--accent-dark); }
   .stack-on-mobile { flex-direction: column !important; }
 
   table { font-size: 13px; }
+}
+
+/* Animation douce de la bannière d'accueil — flottement léger + fondu
+   à l'arrivée sur la page. Volontairement en CSS pur, aucune librairie
+   ajoutée, aucun coût de performance mesurable. */
+.hero-float-image {
+  animation: hero-fade-in 0.9s ease-out, hero-float 4s ease-in-out infinite;
+  animation-delay: 0s, 0.9s;
+}
+
+@keyframes hero-fade-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hero-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Respecte les utilisateurs qui ont désactivé les animations dans leur
+   système (accessibilité) — aucun mouvement forcé dans ce cas. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-float-image { animation: none; }
 }

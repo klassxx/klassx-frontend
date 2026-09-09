@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../api/client";
 import { useAuth } from "../api/AuthContext";
+import PaymentTrustBadge from "../components/PaymentTrustBadge";
 
 const MONTH_FORMATTER = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" });
 
@@ -87,13 +88,16 @@ export default function VideoCapsules() {
               {plan.is_subscribed ? (
                 <button onClick={() => setSelectedPlan(plan)}>Voir le contenu</button>
               ) : (
-                <button
-                  className="btn-primary"
-                  onClick={() => handleSubscribe(plan)}
-                  disabled={subscribingPlanId === plan.id}
-                >
-                  {subscribingPlanId === plan.id ? "…" : "S'abonner"}
-                </button>
+                <>
+                  <button
+                    className="btn-primary"
+                    onClick={() => handleSubscribe(plan)}
+                    disabled={subscribingPlanId === plan.id}
+                  >
+                    {subscribingPlanId === plan.id ? "…" : "S'abonner"}
+                  </button>
+                  <PaymentTrustBadge />
+                </>
               )}
             </div>
           ))}

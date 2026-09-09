@@ -52,6 +52,9 @@ export default function Navbar() {
           <Link to="/catalogue" style={linkStyle}>
             Rejoindre un cours
           </Link>
+          <Link to="/packs" style={linkStyle}>
+            Nos Packs
+          </Link>
           <Link to="/forum" style={linkStyle}>
             Forum
           </Link>
@@ -92,7 +95,19 @@ export default function Navbar() {
               </Link>
             </>
           )}
+          <span title="Programme officiel du Baccalauréat français" style={{ fontSize: 22, lineHeight: 1, marginLeft: 4 }}>
+            🇫🇷
+          </span>
         </nav>
+
+        {/* Même drapeau, visible seulement sur mobile (là où navbar-links-desktop est caché) — voir les classes miroir dans global.css */}
+        <span
+          title="Programme officiel du Baccalauréat français"
+          className="navbar-flag-mobile"
+          style={{ fontSize: 20, lineHeight: 1, display: "none", marginRight: 4 }}
+        >
+          🇫🇷
+        </span>
 
         {/* Mobile hamburger — hidden above 860px */}
         <button
@@ -133,6 +148,9 @@ export default function Navbar() {
           </Link>
           <Link to="/catalogue" onClick={closeMenu} style={{ ...linkStyle, padding: "10px 4px" }}>
             Rejoindre un cours
+          </Link>
+          <Link to="/packs" onClick={closeMenu} style={{ ...linkStyle, padding: "10px 4px" }}>
+            Nos Packs
           </Link>
           <Link to="/forum" onClick={closeMenu} style={{ ...linkStyle, padding: "10px 4px" }}>
             Forum

@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Whiteboard from "./pages/Whiteboard";
 import Blog from "./pages/Blog";
+import Packs from "./pages/Packs";
 import BlogPostPage from "./pages/BlogPostPage";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -19,6 +20,7 @@ import Catalog from "./pages/Catalog";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
+import TeacherSettingsPage from "./pages/TeacherSettingsPage";
 import AffiliateDashboard from "./pages/AffiliateDashboard";
 import Forum from "./pages/Forum";
 import VideoCapsules from "./pages/VideoCapsules";
@@ -43,6 +45,7 @@ export default function App() {
           <Route path="/catalogue" element={<Catalog />} />
           <Route path="/forum" element={<Forum />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/packs" element={<Packs />} />
           <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route
             path="/capsules"
@@ -73,6 +76,14 @@ export default function App() {
             element={
               <ProtectedRoute roles={["teacher"]}>
                 <TeacherDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/enseignant/parametres"
+            element={
+              <ProtectedRoute roles={["teacher"]}>
+                <TeacherSettingsPage />
               </ProtectedRoute>
             }
           />

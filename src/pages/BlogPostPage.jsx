@@ -1,44 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { api } from "../api/client";
-
-/**
- * Pose les balises meta description/og — sans librairie externe
- * (react-helmet non ajouté, pour rester cohérent avec le reste du
- * projet qui évite les nouvelles dépendances non testées). Nettoie ce
- * qu'il a posé en quittant la page, pour ne pas polluer une autre page
- * visitée ensuite dans la même session.
- */
-function useSeoMeta({ title, description, image }) {
-  useEffect(() => {
-    if (!title) return;
-    const previousTitle = document.title;
-    document.title = `${title} — KLASSX`;
-
-    const tags = [];
-    function setMeta(attr, key, content) {
-      if (!content) return;
-      let el = document.querySelector(`meta[${attr}="${key}"]`);
-      const created = !el;
-      if (!el) {
-        el = document.createElement("meta");
-        el.setAttribute(attr, key);
-        document.head.appendChild(el);
-      }
-      el.setAttribute("content", content);
-      if (created) tags.push(el);
-    }
-    setMeta("name", "description", description);
-    setMeta("property", "og:title", title);
-    setMeta("property", "og:description", description);
-    if (image) setMeta("property", "og:image", image);
-
-    return () => {
-      document.title = previousTitle;
-      tags.forEach((el) => el.remove());
-    };
-  }, [title, description, image]);
-}
+import { useSeoMeta } from "../utils/seo";
 
 export default function BlogPostPage() {
   const { slug } = useParams();
@@ -58,6 +21,18 @@ export default function BlogPostPage() {
     title: post?.title,
     description: post?.excerpt,
     image: post?.cover_image,
+    jsonLd: post
+      ? {
+          "@type": "Article",
+          headline: post.title,
+          description: post.excerpt,
+          image: post.cover_image || undefined,
+          datePublished: post.published_at,
+          dateModified: post.updated_at,
+          author: post.author_name ? { "@type": "Person", name: post.author_name } : undefined,
+          publisher: { "@type": "Organization", name: "KLASSX" },
+        }
+      : null,
   });
 
   return (
