@@ -37,12 +37,20 @@ export default function Home() {
           padding: "2rem 1.5rem",
           // Fond clair uni — l'illustration (voir plus bas) a elle-même
           // un fond crème, un fond sombre par-dessus la rendrait terne
-          // et effacerait ses couleurs. Coh\u00e9rent avec le reste du site
+          // et effacerait ses couleurs. Cohérent avec le reste du site
           // (section "Pourquoi choisir KLASSX" juste en dessous).
           background: "var(--surface-0, #F7F6F3)",
           color: "var(--ink, #1B2A4A)",
         }}
       >
+        {/* Fin liseré doré en haut — remet un point d'ancrage visuel
+            fort, sans revenir à un fond sombre sur toute la bannière. */}
+        <div
+          style={{
+            position: "absolute", top: 0, left: 0, right: 0, height: 4,
+            background: "linear-gradient(90deg, var(--accent-dark, #A97A22), var(--accent, #C9932E), var(--accent-dark, #A97A22))",
+          }}
+        />
         <div style={{ maxWidth: 680 }}>
           <p
             style={{
@@ -87,17 +95,24 @@ export default function Home() {
           </a>
 
           {HERO_IMAGE_URL && (
-            <img
-              src={HERO_IMAGE_URL}
-              alt=""
+            <div
               className="hero-float-image"
-              style={{ maxWidth: 480, width: "100%", marginTop: 40 }}
-            />
+              style={{
+                maxWidth: 480, width: "100%", marginTop: 40, marginLeft: "auto", marginRight: "auto",
+                background: "var(--surface-1, #FFFFFF)", borderRadius: "var(--radius, 16px)",
+                boxShadow: "0 12px 32px rgba(27,42,74,0.12)", padding: 12,
+              }}
+            >
+              <img src={HERO_IMAGE_URL} alt="" style={{ width: "100%", display: "block", borderRadius: "calc(var(--radius, 16px) - 6px)" }} />
+            </div>
           )}
         </div>
       </section>
 
       {/* --- Matières disponibles --- */}
+      {/* Fond blanc pur, en rupture avec le crème de la bannière au-dessus
+          — évite l'effet "tout se fond ensemble" repéré visuellement. */}
+      <div style={{ background: "var(--surface-1, #FFFFFF)" }}>
       <section className="container" style={{ paddingTop: "2.5rem", paddingBottom: "3.5rem" }}>
         <p
           style={{
@@ -122,6 +137,7 @@ export default function Home() {
           <SubjectBadge icon="🎤" label="Grand Oral" />
         </div>
       </section>
+      </div>
 
       {/* --- Pourquoi KLASSX --- */}
       <section className="container">
@@ -249,6 +265,40 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      {/* --- Chat avec un enseignant --- */}
+      <div style={{ background: "var(--ink, #1B2A4A)" }}>
+        <section
+          className="container"
+          style={{
+            paddingTop: "3rem", paddingBottom: "3rem", display: "flex",
+            flexWrap: "wrap", alignItems: "center", gap: 32, justifyContent: "space-between",
+          }}
+        >
+          <div style={{ flex: "1 1 340px" }}>
+            <p
+              style={{
+                fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase",
+                color: "var(--accent, #C9932E)", margin: "0 0 12px",
+              }}
+            >
+              Nouveau
+            </p>
+            <h2 style={{ fontSize: 26, fontWeight: 600, color: "white", margin: "0 0 12px" }}>
+              💬 Une question sur un exercice ? Écrivez directement à un enseignant
+            </h2>
+            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.8)", margin: 0, lineHeight: 1.6 }}>
+              Envoyez votre question, joignez une photo de votre devoir — réponse sous 24h.
+              La première question est gratuite, sans engagement.
+            </p>
+          </div>
+          <Link to="/chat-enseignant">
+            <button className="btn-accent" style={{ padding: "14px 28px", fontSize: 15, whiteSpace: "nowrap" }}>
+              Essayer gratuitement
+            </button>
+          </Link>
+        </section>
+      </div>
 
       {/* --- Nos enseignants experts --- */}
       {teachers.length > 0 && (

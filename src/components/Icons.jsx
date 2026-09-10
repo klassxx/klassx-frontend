@@ -159,6 +159,15 @@ export function IconTiktok(props) {
   );
 }
 
+export function IconYoutube(props) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="3" y="6.5" width="18" height="11" rx="3.5" />
+      <path d="M10.5 9.8v4.4l4-2.2z" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export function IconSend(props) {
   return (
     <svg {...base} {...props}>

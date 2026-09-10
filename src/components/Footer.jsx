@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
-import { IconInstagram, IconFacebook, IconLinkedin, IconTiktok, IconSend } from "./Icons";
+import { IconInstagram, IconFacebook, IconLinkedin, IconTiktok, IconYoutube, IconSend } from "./Icons";
 
 const socialLinks = [
   { label: "Instagram", href: "https://instagram.com/klassx", Icon: IconInstagram },
   { label: "Facebook", href: "https://facebook.com/klassx", Icon: IconFacebook },
   { label: "LinkedIn", href: "https://linkedin.com/company/klassx", Icon: IconLinkedin },
   { label: "TikTok", href: "https://tiktok.com/@klassx", Icon: IconTiktok },
+  { label: "YouTube", href: "https://youtube.com/@klassx", Icon: IconYoutube },
 ];
 
 export default function Footer() {
