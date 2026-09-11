@@ -119,11 +119,6 @@ export default function ChatTutoring() {
                 {sub.status === "pending" && !sub.free_question_used && (
                   <button onClick={() => setActiveSubscriptionId(sub.id)}>Poser ma question gratuite</button>
                 )}
-                {sub.status === "pending" && sub.free_question_used && (
-                  <button onClick={() => handleSubscribe({ id: sub.plan })} disabled={buyingId === sub.plan}>
-                    {buyingId === sub.plan ? "…" : "Payer maintenant"}
-                  </button>
-                )}
               </div>
             ))}
           </div>
@@ -154,13 +149,18 @@ export default function ChatTutoring() {
               <p style={{ fontSize: 22, fontWeight: 700, margin: "8px 0 0" }}>
                 {(plan.price_cents / 100).toFixed(2)}€<span style={{ fontSize: 13, fontWeight: 400 }}>/mois</span>
               </p>
-              {!existingSub && canTryFree && (
-                <button onClick={() => handleTryFree(plan)} disabled={buyingId === plan.id}>
+              {canTryFree && !isActive && (
+                <button
+                  onClick={() =>
+                    existingSub ? setActiveSubscriptionId(existingSub.id) : handleTryFree(plan)
+                  }
+                  disabled={buyingId === plan.id}
+                >
                   {buyingId === plan.id ? "…" : "🎁 Poser ma 1ère question gratuitement"}
                 </button>
               )}
               <button className="btn-primary" onClick={() => handleSubscribe(plan)} disabled={buyingId === plan.id || isActive}>
-                {isActive ? "Déjà abonné" : buyingId === plan.id ? "…" : "S'abonner"}
+                {isActive ? "Déjà abonné" : buyingId === plan.id ? "…" : existingSub ? "Payer maintenant" : "S'abonner"}
               </button>
               {!isActive && <PaymentTrustBadge />}
             </div>
