@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import { useAuth } from "../api/AuthContext";
 import PaymentTrustBadge from "../components/PaymentTrustBadge";
+import TunisiaPaymentNote from "../components/TunisiaPaymentNote";
 
 const MONTH_FORMATTER = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" });
 
@@ -123,6 +124,7 @@ export default function VideoCapsules() {
                     {subscribingPlanId === plan.id ? "…" : "S'abonner"}
                   </button>
                   <PaymentTrustBadge />
+                  <TunisiaPaymentNote user={user} />
                 </>
               )}
             </div>

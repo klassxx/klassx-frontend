@@ -5,6 +5,7 @@ import { useAuth } from "../api/AuthContext";
 import SpecialtyChips from "../components/SpecialtyChips";
 import Skeleton from "../components/Skeleton";
 import ReferralCard from "../components/ReferralCard";
+import TunisiaPaymentNote from "../components/TunisiaPaymentNote";
 
 const MAX_PREMIERE = 3;
 const MAX_TERMINALE = 2;
@@ -237,9 +238,12 @@ export default function Dashboard() {
                 )}
               </div>
               {!enrollment.waitlisted && enrollment.payment_status !== "paid" && (
-                <button className="btn-primary" onClick={() => handlePay(enrollment)} disabled={payingId === enrollment.id}>
-                  {payingId === enrollment.id ? "…" : "Payer"}
-                </button>
+                <>
+                  <button className="btn-primary" onClick={() => handlePay(enrollment)} disabled={payingId === enrollment.id}>
+                    {payingId === enrollment.id ? "…" : "Payer"}
+                  </button>
+                  <TunisiaPaymentNote user={user} />
+                </>
               )}
               {!enrollment.waitlisted && enrollment.payment_status === "paid" && session?.meeting_url && (
                 <a href={session.meeting_url} target="_blank" rel="noreferrer">
@@ -340,12 +344,17 @@ function MySpecialtiesSection({ user, onUpdated }) {
     }
   }
 
+  const hasNoSpecialtiesYet =
+    (profile.premiere_specialties || []).length === 0 && (profile.terminale_specialties || []).length === 0;
+
   return (
     <div className="card" style={{ marginBottom: 24 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h2 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Mes matières</h2>
         {!editing && (
-          <button onClick={() => setEditing(true)}>Modifier</button>
+          <button onClick={() => setEditing(true)}>
+            {hasNoSpecialtiesYet ? "Choisir mes spécialités" : "Modifier"}
+          </button>
         )}
       </div>
 
@@ -357,7 +366,9 @@ function MySpecialtiesSection({ user, onUpdated }) {
             Spécialités 1ère
           </p>
           {(profile.premiere_specialties || []).length === 0 ? (
-            <p style={{ fontSize: 12, color: "var(--text-muted)", margin: 0 }}>Aucune renseignée.</p>
+            <p style={{ fontSize: 12, color: "var(--text-muted)", margin: 0 }}>
+              Aucune renseignée — cliquez sur « Choisir mes spécialités » ci-dessus.
+            </p>
           ) : (
             <p style={{ fontSize: 13, margin: 0 }}>
               {profile.premiere_specialties.map((s) => s.name).join(", ")}

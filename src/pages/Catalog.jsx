@@ -177,12 +177,10 @@ export default function Catalog() {
   }, []);
 
   const ratesByTier = Object.fromEntries(pricing.map((p) => [p.group_tier, p.price_per_hour_eur]));
-  // Les élèves tunisiens voient les prix en dinars ; le paiement en ligne
-  // n'est pas disponible pour ce pays (pas d'intermédiaire de paiement
-  // tunisien fiable pour l'instant) — voir IndividualBookingView /
-  // EnrollmentViewSet.create_checkout_session / SeriesMembershipViewSet
-  // .checkout côté backend, qui renvoient une invitation à nous contacter
-  // par e-mail plutôt qu'une URL de paiement pour ces élèves.
+  // Les élèves tunisiens voient les prix en dinars (affichage uniquement —
+  // le paiement en ligne via Stripe fonctionne normalement pour eux aussi,
+  // voir TunisiaPaymentNote pour le seul rappel encore lié à la Tunisie :
+  // que faire si leur carte locale est refusée).
   const isTunisia = user?.country === "Tunisie";
   const ratesByTierTnd = Object.fromEntries(pricing.map((p) => [p.group_tier, p.price_per_hour_tnd]));
 
@@ -208,7 +206,7 @@ export default function Catalog() {
     if (s.level !== "both" && s.level !== level) return false;
     if (s.bac_type !== effectiveBacType) return false;
     if (!user || effectiveBacType !== "general") return true;
-    if (s.subject_type === "common_core") return true;
+    if (s.subject_type === "common_core" || s.subject_type === "optional") return true;
     if (s.subject_type === "math_option") return s.id === chosenMathOptionId;
     return chosenSpecialtyIds.includes(s.id);
   });
@@ -606,6 +604,7 @@ export default function Catalog() {
             <button type="button" className="btn-primary" onClick={handleAddPaymentMethod} disabled={addingCard}>
               {addingCard ? "Redirection…" : "Ajouter ma carte"}
             </button>
+            <TunisiaPaymentNote user={user} />
           </div>
         )}
 
@@ -635,6 +634,7 @@ export default function Catalog() {
           {submitting ? "Envoi…" : isIndividual ? "Réserver et payer" : "Demander une place"}
         </button>
         {isIndividual && <PaymentTrustBadge />}
+        {isIndividual && <TunisiaPaymentNote user={user} />}
       </form>
 
       {user && !isIndividual && (

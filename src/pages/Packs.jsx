@@ -4,6 +4,7 @@ import { api } from "../api/client";
 import { useAuth } from "../api/AuthContext";
 import Skeleton from "../components/Skeleton";
 import PaymentTrustBadge from "../components/PaymentTrustBadge";
+import TunisiaPaymentNote from "../components/TunisiaPaymentNote";
 
 export default function Packs() {
   const [packs, setPacks] = useState([]);
@@ -82,6 +83,7 @@ export default function Packs() {
               {buyingId === pack.id ? "…" : "Réserver ce pack"}
             </button>
             <PaymentTrustBadge />
+            <TunisiaPaymentNote user={user} />
           </div>
         ))}
       </div>

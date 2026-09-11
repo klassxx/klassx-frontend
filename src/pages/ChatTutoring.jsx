@@ -4,6 +4,7 @@ import { api } from "../api/client";
 import { useAuth } from "../api/AuthContext";
 import Skeleton from "../components/Skeleton";
 import PaymentTrustBadge from "../components/PaymentTrustBadge";
+import TunisiaPaymentNote from "../components/TunisiaPaymentNote";
 
 export default function ChatTutoring() {
   const { user } = useAuth();
@@ -163,6 +164,7 @@ export default function ChatTutoring() {
                 {isActive ? "Déjà abonné" : buyingId === plan.id ? "…" : existingSub ? "Payer maintenant" : "S'abonner"}
               </button>
               {!isActive && <PaymentTrustBadge />}
+              {!isActive && <TunisiaPaymentNote user={user} />}
             </div>
           );
         })}
