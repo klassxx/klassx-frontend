@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import { useAuth } from "../api/AuthContext";
 import PaymentTrustBadge from "../components/PaymentTrustBadge";
@@ -51,6 +52,31 @@ export default function VideoCapsules() {
         Vidéos et PDF de révision, sans accompagnement par un enseignant. Chaque abonnement est
         indépendant — 4,99€/mois, résiliable à tout moment.
       </p>
+
+      <Link
+        to="/chat-enseignant"
+        className="card"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+          marginBottom: 24,
+          textDecoration: "none",
+        }}
+      >
+        <div>
+          <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 2px" }}>
+            Besoin d'aide sur un exercice précis ?
+          </p>
+          <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}>
+            Posez votre question directement à un enseignant — 1ère question gratuite.
+          </p>
+        </div>
+        <span className="btn-primary" style={{ whiteSpace: "nowrap" }}>
+          Voir le chat enseignant
+        </span>
+      </Link>
 
       {error && (
         <p className="card" style={{ background: "var(--warning-bg)", color: "var(--warning)", border: "none", marginBottom: 20 }}>

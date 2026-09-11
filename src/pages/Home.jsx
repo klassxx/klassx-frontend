@@ -132,6 +132,7 @@ export default function Home() {
           <SubjectBadge icon="✍️" label="Français" />
           <SubjectBadge icon="💭" label="Philosophie" />
           <SubjectBadge icon="⚛️" label="Physique-Chimie" />
+          <SubjectBadge icon="🧬" label="SVT" />
           <SubjectBadge icon="🌍" label="HGGSP" />
           <SubjectBadge icon="📊" label="SES" />
           <SubjectBadge icon="🎤" label="Grand Oral" />

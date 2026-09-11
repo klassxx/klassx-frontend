@@ -116,6 +116,14 @@ export default function ChatTutoring() {
                 {sub.status === "active" && (
                   <button onClick={() => setActiveSubscriptionId(sub.id)}>Ouvrir le fil</button>
                 )}
+                {sub.status === "pending" && !sub.free_question_used && (
+                  <button onClick={() => setActiveSubscriptionId(sub.id)}>Poser ma question gratuite</button>
+                )}
+                {sub.status === "pending" && sub.free_question_used && (
+                  <button onClick={() => handleSubscribe({ id: sub.plan })} disabled={buyingId === sub.plan}>
+                    {buyingId === sub.plan ? "…" : "Payer maintenant"}
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -127,8 +135,8 @@ export default function ChatTutoring() {
       <p style={{ fontSize: 13, fontWeight: 600, margin: "0 0 8px" }}>Services disponibles</p>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20 }}>
         {plans.map((plan) => {
-          const alreadySubscribed = subscriptions.some((s) => s.plan === plan.id && s.status !== "cancelled");
           const existingSub = subscriptions.find((s) => s.plan === plan.id);
+          const isActive = existingSub?.status === "active";
           const canTryFree = !existingSub || !existingSub.free_question_used;
           return (
             <div key={plan.id} className="card" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -146,15 +154,15 @@ export default function ChatTutoring() {
               <p style={{ fontSize: 22, fontWeight: 700, margin: "8px 0 0" }}>
                 {(plan.price_cents / 100).toFixed(2)}€<span style={{ fontSize: 13, fontWeight: 400 }}>/mois</span>
               </p>
-              {!alreadySubscribed && canTryFree && (
+              {!existingSub && canTryFree && (
                 <button onClick={() => handleTryFree(plan)} disabled={buyingId === plan.id}>
                   {buyingId === plan.id ? "…" : "🎁 Poser ma 1ère question gratuitement"}
                 </button>
               )}
-              <button className="btn-primary" onClick={() => handleSubscribe(plan)} disabled={buyingId === plan.id || alreadySubscribed}>
-                {alreadySubscribed ? "Déjà abonné" : buyingId === plan.id ? "…" : "S'abonner"}
+              <button className="btn-primary" onClick={() => handleSubscribe(plan)} disabled={buyingId === plan.id || isActive}>
+                {isActive ? "Déjà abonné" : buyingId === plan.id ? "…" : "S'abonner"}
               </button>
-              {!alreadySubscribed && <PaymentTrustBadge />}
+              {!isActive && <PaymentTrustBadge />}
             </div>
           );
         })}
