@@ -73,9 +73,19 @@ export default function Navbar() {
                   Maths en libre-service
                 </Link>
               )}
+              {(user.role === "student" || user.role === "admin") && (
+                <Link to="/chat-enseignant" style={linkStyle}>
+                  Chat avec un enseignant
+                </Link>
+              )}
               {user.role === "teacher" && (
                 <Link to="/enseignant" style={linkStyle}>
                   Mes cours
+                </Link>
+              )}
+              {(user.role === "teacher" || user.role === "admin") && (
+                <Link to="/enseignant/chat" style={linkStyle}>
+                  Chat élèves
                 </Link>
               )}
               {user.role === "admin" && (
@@ -170,9 +180,19 @@ export default function Navbar() {
                   Maths en libre-service
                 </Link>
               )}
+              {(user.role === "student" || user.role === "admin") && (
+                <Link to="/chat-enseignant" onClick={closeMenu} style={{ ...linkStyle, padding: "10px 4px" }}>
+                  Chat avec un enseignant
+                </Link>
+              )}
               {user.role === "teacher" && (
                 <Link to="/enseignant" onClick={closeMenu} style={{ ...linkStyle, padding: "10px 4px" }}>
                   Mes cours
+                </Link>
+              )}
+              {(user.role === "teacher" || user.role === "admin") && (
+                <Link to="/enseignant/chat" onClick={closeMenu} style={{ ...linkStyle, padding: "10px 4px" }}>
+                  Chat élèves
                 </Link>
               )}
               {user.role === "admin" && (

@@ -24,6 +24,8 @@ import TeacherSettingsPage from "./pages/TeacherSettingsPage";
 import AffiliateDashboard from "./pages/AffiliateDashboard";
 import Forum from "./pages/Forum";
 import VideoCapsules from "./pages/VideoCapsules";
+import ChatTutoring from "./pages/ChatTutoring";
+import TeacherChatPage from "./pages/TeacherChatPage";
 
 export default function App() {
   return (
@@ -47,6 +49,14 @@ export default function App() {
           <Route path="/blog" element={<Blog />} />
           <Route path="/packs" element={<Packs />} />
           <Route path="/blog/:slug" element={<BlogPostPage />} />
+          <Route
+            path="/chat-enseignant"
+            element={
+              <ProtectedRoute roles={["student", "admin"]}>
+                <ChatTutoring />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/capsules"
             element={
@@ -84,6 +94,14 @@ export default function App() {
             element={
               <ProtectedRoute roles={["teacher"]}>
                 <TeacherSettingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/enseignant/chat"
+            element={
+              <ProtectedRoute roles={["teacher", "admin"]}>
+                <TeacherChatPage />
               </ProtectedRoute>
             }
           />
