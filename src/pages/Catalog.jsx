@@ -5,6 +5,7 @@ import { useAuth } from "../api/AuthContext";
 import ParisDateTimePicker from "../components/ParisDateTimePicker";
 import Skeleton from "../components/Skeleton";
 import PaymentTrustBadge from "../components/PaymentTrustBadge";
+import TunisiaPaymentNote from "../components/TunisiaPaymentNote";
 import { parisWallTimeToUtcIso, splitLocalDateTime } from "../utils/parisTime";
 
 const TIER_LABELS = {
@@ -177,12 +178,6 @@ export default function Catalog() {
   }, []);
 
   const ratesByTier = Object.fromEntries(pricing.map((p) => [p.group_tier, p.price_per_hour_eur]));
-  // Les élèves tunisiens voient les prix en dinars (affichage uniquement —
-  // le paiement en ligne via Stripe fonctionne normalement pour eux aussi,
-  // voir TunisiaPaymentNote pour le seul rappel encore lié à la Tunisie :
-  // que faire si leur carte locale est refusée).
-  const isTunisia = user?.country === "Tunisie";
-  const ratesByTierTnd = Object.fromEntries(pricing.map((p) => [p.group_tier, p.price_per_hour_tnd]));
 
   const profile = user?.student_profile;
   const chosenSpecialtyIds = (
@@ -351,9 +346,6 @@ export default function Catalog() {
   const individualPrice = isIndividual && ratesByTier.INDIVIDUAL != null
     ? ((individualDuration / 60) * ratesByTier.INDIVIDUAL).toFixed(2)
     : null;
-  const individualPriceTnd = isIndividual && ratesByTierTnd.INDIVIDUAL != null
-    ? ((individualDuration / 60) * ratesByTierTnd.INDIVIDUAL).toFixed(2)
-    : null;
 
   return (
     <div className="container">
@@ -387,15 +379,7 @@ export default function Catalog() {
           >
             <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "0 0 4px" }}>{TIER_LABELS[p.group_tier]}</p>
             <p style={{ fontSize: 18, fontWeight: 600, color: "var(--ink)", margin: 0 }}>
-              {isTunisia ? (
-                <>
-                  {p.price_per_hour_tnd} DT<span style={{ fontSize: 12, fontWeight: 400, color: "var(--text-muted)" }}>/h</span>
-                </>
-              ) : (
-                <>
-                  {p.price_per_hour_eur}€<span style={{ fontSize: 12, fontWeight: 400, color: "var(--text-muted)" }}>/h</span>
-                </>
-              )}
+              {p.price_per_hour_eur}€<span style={{ fontSize: 12, fontWeight: 400, color: "var(--text-muted)" }}>/h</span>
             </p>
           </div>
         ))}
@@ -541,11 +525,7 @@ export default function Catalog() {
               Prix de cette séance :{" "}
               <strong>
                 {promoStatus === "valid"
-                  ? isTunisia
-                    ? `${(individualPriceTnd * (1 - promoPercentage / 100)).toFixed(2)} DT`
-                    : `${(individualPrice * (1 - promoPercentage / 100)).toFixed(2)} €`
-                  : isTunisia
-                  ? `${individualPriceTnd} DT`
+                  ? `${(individualPrice * (1 - promoPercentage / 100)).toFixed(2)} €`
                   : `${individualPrice} €`}
               </strong>{" "}
               — paiement immédiat, sans engagement.
@@ -564,21 +544,10 @@ export default function Catalog() {
               ))}
             </select>
             <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "0 0 20px" }}>
-              {isTunisia ? (
-                <>
-                  Formule : <strong>{TIER_LABELS[groupTier]}</strong> ({ratesByTierTnd[groupTier]} DT/h) — soit
-                  environ <strong>{(weeklyHours * (ratesByTierTnd[groupTier] || 0)).toFixed(2)} DT/mois</strong>.
-                  Paiement mensuel via Konnect — contrairement à la carte bancaire internationale, il n'y a pas de
-                  prélèvement automatique : il faudra relancer le paiement chaque mois depuis votre tableau de bord.
-                </>
-              ) : (
-                <>
-                  Formule : <strong>{TIER_LABELS[groupTier]}</strong> ({ratesByTier[groupTier]}€/h) — soit environ{" "}
-                  <strong>{(weeklyHours * (ratesByTier[groupTier] || 0)).toFixed(2)} €/mois</strong>. Facturation
-                  mensuelle, reconduite automatiquement ; un changement ou une annulation prend effet le mois
-                  suivant.
-                </>
-              )}
+              Formule : <strong>{TIER_LABELS[groupTier]}</strong> ({ratesByTier[groupTier]}€/h) — soit environ{" "}
+              <strong>{(weeklyHours * (ratesByTier[groupTier] || 0)).toFixed(2)} €/mois</strong>. Facturation
+              mensuelle, reconduite automatiquement ; un changement ou une annulation prend effet le mois
+              suivant.
             </p>
           </>
         )}

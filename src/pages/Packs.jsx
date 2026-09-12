@@ -72,12 +72,6 @@ export default function Packs() {
             )}
             <p style={{ fontSize: 22, fontWeight: 700, margin: "8px 0 0" }}>
               {(pack.price_cents / 100).toFixed(2)}€
-              {pack.price_millimes_tnd != null && (
-                <span style={{ fontSize: 13, fontWeight: 400, color: "var(--text-muted)" }}>
-                  {" "}
-                  ({(pack.price_millimes_tnd / 1000).toFixed(2)} DT)
-                </span>
-              )}
             </p>
             <button className="btn-primary" onClick={() => handleBuy(pack)} disabled={buyingId === pack.id}>
               {buyingId === pack.id ? "…" : "Réserver ce pack"}

@@ -14,7 +14,6 @@ function formatMonth(dateStr) {
 
 export default function VideoCapsules() {
   const { user } = useAuth();
-  const isTunisia = user?.country === "Tunisie";
   const [plans, setPlans] = useState([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState(null);
@@ -107,9 +106,7 @@ export default function VideoCapsules() {
             >
               <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>{plan.name}</h3>
               <p style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>
-                {isTunisia
-                  ? `${plan.price_tnd.toFixed(2).replace(".", ",")} DT`
-                  : `${plan.price_eur.toFixed(2).replace(".", ",")}€`}
+                {plan.price_eur.toFixed(2).replace(".", ",")}€
                 <span style={{ fontSize: 12, fontWeight: 400, color: "var(--text-muted)" }}> /mois</span>
               </p>
               {plan.is_subscribed ? (

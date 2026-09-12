@@ -830,7 +830,7 @@ function TeacherSelfStudyContent() {
   const [chapterName, setChapterName] = useState("");
   const [month, setMonth] = useState("");
   const [description, setDescription] = useState("");
-  const [videoUrl, setVideoUrl] = useState("");
+  const [videoFile, setVideoFile] = useState(null);
   const [pdfFile, setPdfFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState("");
@@ -857,8 +857,8 @@ function TeacherSelfStudyContent() {
       setNotice("Sélectionnez un fichier PDF.");
       return;
     }
-    if (contentType === "video" && !videoUrl) {
-      setNotice("Indiquez le lien de la vidéo.");
+    if (contentType === "video" && !videoFile) {
+      setNotice("Sélectionnez un fichier vidéo.");
       return;
     }
     setSubmitting(true);
@@ -872,14 +872,14 @@ function TeacherSelfStudyContent() {
       formData.append("month", `${month}-01`);
       formData.append("description", description);
       if (contentType === "pdf") formData.append("pdf_file", pdfFile);
-      else formData.append("video_provider_id", videoUrl);
+      else formData.append("video_file", videoFile);
 
       const created = await api.submitSelfStudyContent(formData);
       setItems((prev) => [created, ...prev]);
       setTitle("");
       setChapterName("");
       setDescription("");
-      setVideoUrl("");
+      setVideoFile(null);
       setPdfFile(null);
       setNotice("Contenu soumis — en attente de validation par l'équipe KLASSX.");
     } catch (err) {
@@ -943,14 +943,8 @@ function TeacherSelfStudyContent() {
 
             {contentType === "video" ? (
               <div>
-                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Lien de la vidéo</label>
-                <input
-                  type="url"
-                  placeholder="https://..."
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  style={{ width: "100%" }}
-                />
+                <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>Fichier vidéo</label>
+                <input type="file" accept="video/*" onChange={(e) => setVideoFile(e.target.files?.[0] || null)} />
               </div>
             ) : (
               <div>
