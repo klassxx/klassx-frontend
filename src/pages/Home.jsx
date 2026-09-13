@@ -109,6 +109,28 @@ export default function Home() {
         </div>
       </section>
 
+      {/* --- Offre : 1 mois gratuit de Maths --- */}
+      <section className="container" style={{ paddingTop: "2rem" }}>
+        <div
+          className="card"
+          style={{
+            textAlign: "center", background: "var(--accent-soft, #FFF4E5)",
+            border: "1px solid var(--accent, #E8A33D)", padding: "24px 20px",
+          }}
+        >
+          <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--accent)", margin: "0 0 6px" }}>
+            🎁 Offre de rentrée — jusqu'au 30 octobre 2026
+          </p>
+          <p style={{ fontSize: 18, fontWeight: 600, margin: "0 0 6px" }}>
+            1 forfait de groupe acheté = 1 mois de Maths offert
+          </p>
+          <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}>
+            Même formule (taille de groupe et heures/mois) que votre forfait acheté, valable dès que votre groupe
+            est constitué et votre premier mois facturé — contactez-nous à ce moment pour recevoir votre code.
+          </p>
+        </div>
+      </section>
+
       {/* --- Matières disponibles --- */}
       {/* Fond blanc pur, en rupture avec le crème de la bannière au-dessus
           — évite l'effet "tout se fond ensemble" repéré visuellement. */}
@@ -305,6 +327,9 @@ export default function Home() {
       {teachers.length > 0 && (
         <section className="container">
           <SectionHeading eyebrow="L'équipe" title="Nos enseignants experts" />
+          <p style={{ fontSize: 14, fontWeight: 600, color: "var(--accent)", margin: "0 0 16px" }}>
+            ✅ Tous nos enseignants sont 100% vérifiés
+          </p>
           <div
             style={{
               display: "grid",

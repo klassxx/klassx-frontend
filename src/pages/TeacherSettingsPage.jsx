@@ -3,12 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 
 /**
- * /enseignant/parametres — séparé de TeacherDashboard.jsx (page "Mes
- * cours") pour ne pas surcharger cette dernière — spec : "ça devient
- * beaucoup de choses dans une même page". Regroupe ce qui concerne le
- * PROFIL de l'enseignant lui-même (visioconférence + profil public),
- * distinct de la gestion de ses cours/groupes qui reste sur le tableau
- * de bord principal.
+ * /enseignant/parametres — regroupe le profil PUBLIC de l'enseignant
+ * (visible des élèves) — matières, présentation. La visioconférence
+ * (compte Google, lien personnel) vit sur /enseignant (TeacherDashboard,
+ * page "Mes cours"), pas ici.
  */
 export default function TeacherSettingsPage() {
   const [settings, setSettings] = useState(null);
@@ -28,7 +26,7 @@ export default function TeacherSettingsPage() {
       <div className="page-header">
         <div>
           <h1>Mon profil</h1>
-          <p>Réglages de visioconférence et profil public visible des élèves.</p>
+          <p>Profil public visible des élèves.</p>
         </div>
       </div>
 
@@ -38,101 +36,9 @@ export default function TeacherSettingsPage() {
 
       {settings && (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <TeacherVideoSettings settings={settings} onChange={setSettings} />
           <TeacherProfileSettings settings={settings} onChange={setSettings} allSubjects={allSubjects} />
         </div>
       )}
-    </div>
-  );
-}
-
-function TeacherVideoSettings({ settings, onChange }) {
-  const [defaultMeetingUrl, setDefaultMeetingUrl] = useState(settings.default_meeting_url || "");
-  const [saving, setSaving] = useState(false);
-  const [connecting, setConnecting] = useState(false);
-  const [notice, setNotice] = useState("");
-
-  async function handleSaveLink(e) {
-    e.preventDefault();
-    setSaving(true);
-    setNotice("");
-    try {
-      const updated = await api.updateTeacherSettings({ default_meeting_url: defaultMeetingUrl });
-      onChange(updated);
-      setNotice("Lien enregistré.");
-    } catch (err) {
-      setNotice(err.message || "L'enregistrement a échoué.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleConnectGoogle() {
-    setConnecting(true);
-    setNotice("");
-    try {
-      const { authorization_url } = await api.connectGoogle();
-      window.location.href = authorization_url;
-    } catch (err) {
-      setNotice(err.message || "La connexion à Google n'est pas disponible pour le moment.");
-      setConnecting(false);
-    }
-  }
-
-  async function handleDisconnectGoogle() {
-    setConnecting(true);
-    try {
-      const updated = await api.disconnectGoogle();
-      onChange(updated);
-    } catch (err) {
-      setNotice(err.message || "La déconnexion a échoué.");
-    } finally {
-      setConnecting(false);
-    }
-  }
-
-  return (
-    <div className="card" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      <div>
-        <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 4px" }}>Compte Google</p>
-        <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 8px" }}>
-          Connectez votre compte Google pour qu'un lien Google Meet soit généré automatiquement, sur votre propre
-          calendrier, pour chaque séance que vous planifiez.
-        </p>
-        {settings.google_connected ? (
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 13 }}>Connecté : {settings.google_account_email}</span>
-            <button onClick={handleDisconnectGoogle} disabled={connecting}>
-              {connecting ? "…" : "Déconnecter"}
-            </button>
-          </div>
-        ) : (
-          <button className="btn-primary" onClick={handleConnectGoogle} disabled={connecting}>
-            {connecting ? "…" : "Connecter mon compte Google"}
-          </button>
-        )}
-      </div>
-
-      <form onSubmit={handleSaveLink}>
-        <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 4px" }}>Lien personnel (Zoom, Teams, ou Meet)</p>
-        <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 8px" }}>
-          Utilisé par défaut si vous n'avez pas connecté de compte Google, ou pour tout autre outil de visioconférence.
-        </p>
-        <div style={{ display: "flex", gap: 8 }}>
-          <input
-            type="url"
-            placeholder="https://..."
-            value={defaultMeetingUrl}
-            onChange={(e) => setDefaultMeetingUrl(e.target.value)}
-            style={{ flex: 1 }}
-          />
-          <button type="submit" className="btn-primary" disabled={saving}>
-            {saving ? "…" : "Enregistrer"}
-          </button>
-        </div>
-      </form>
-
-      {notice && <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: 0 }}>{notice}</p>}
     </div>
   );
 }

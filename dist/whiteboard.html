@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableau de leçons</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.5/peerjs.min.js"></script>
+<style>
+  :root{
+    --ink-700:#232C52;
+    --ink-800:#182047;
+    --ink-900:#10132A;
+    --paper-tint:#F4F3EF;
+    --gold:#B8902E;
+    --gold-soft:#D9BD73;
+    --status-green:#3FA672;
+    --board-light:#FAF9F5;
+    --record-red:#C6423F;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;height:100dvh;}
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background:var(--ink-900);
+    color:var(--paper-tint);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* ---------- HEADER ---------- */
+  header{
+    background:linear-gradient(180deg,var(--ink-700),var(--ink-800));
+    border-bottom:1px solid rgba(255,255,255,.06);
+    padding:10px 16px;
+    display:flex;
+    align-items:center;
+    gap:16px;
+    flex-shrink:0;
+    box-shadow:0 1px 0 rgba(0,0,0,.2);
+  }
+  .brand{
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-weight:500;
+    font-size:21px;
+    color:var(--paper-tint);
+    white-space:nowrap;
+    letter-spacing:.2px;
+  }
+
+  .pages-strip{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    flex:1;
+    min-width:0;
+    padding:4px 0;
+    scrollbar-width:thin;
+  }
+  .page-thumb{
+    position:relative;
+    flex-shrink:0;
+    width:64px;
+    height:36px;
+    border-radius:5px;
+    border:2px solid rgba(247,244,234,.25);
+    background:var(--ink-900);
+    cursor:pointer;
+    overflow:hidden;
+    transition:border-color .15s, transform .15s;
+  }
+  .page-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .page-thumb.active{border-color:var(--gold);transform:translateY(-2px);}
+  .page-thumb .del{
+    position:absolute;top:0;right:0;
+    background:rgba(220,59,46,.85);
+    color:#fff;font-size:10px;line-height:1;
+    padding:2px 4px;border-radius:0 0 0 5px;
+    display:none;
+  }
+  .page-thumb:hover .del{display:block;}
+  .add-page{
+    flex-shrink:0;height:36px;
+    padding:0 14px;
+    border-radius:8px;border:1px solid rgba(255,255,255,.14);
+    background:rgba(255,255,255,.06);color:var(--paper-tint);
+    font-family:'Inter';font-weight:600;font-size:13px;
+    display:flex;align-items:center;gap:6px;
+    cursor:pointer;white-space:nowrap;
+    transition:background .15s, border-color .15s;
+  }
+  .add-page:hover{border-color:var(--gold);background:rgba(184,144,46,.12);color:var(--gold-soft);}
+  .add-page svg{width:16px;height:16px;}
+
+  .record-zone{
+    display:flex;align-items:center;gap:10px;flex-shrink:0;
+  }
+  .rec-time{
+    font-variant-numeric:tabular-nums;
+    font-size:14px;color:var(--paper-tint);
+    opacity:.85;min-width:44px;text-align:right;
+  }
+  .rec-btn{
+    display:flex;align-items:center;gap:8px;
+    background:rgba(0,0,0,.25);
+    border:1px solid rgba(247,244,234,.25);
+    color:var(--paper-tint);
+    border-radius:20px;
+    padding:8px 16px;
+    font-family:'Inter';font-weight:600;font-size:13px;
+    cursor:pointer;transition:background .15s;
+  }
+  .rec-btn:hover{background:rgba(0,0,0,.4);}
+  .rec-dot{
+    width:11px;height:11px;border-radius:50%;
+    background:var(--record-red);
+    box-shadow:0 0 0 rgba(220,59,46,.5);
+  }
+  .rec-btn.recording .rec-dot{
+    animation:pulse 1.2s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(220,59,46,.6);}
+    70%{box-shadow:0 0 0 9px rgba(220,59,46,0);}
+    100%{box-shadow:0 0 0 0 rgba(220,59,46,0);}
+  }
+  .icon-btn{
+    background:rgba(0,0,0,.2);
+    border:1px solid rgba(247,244,234,.2);
+    color:var(--paper-tint);
+    border-radius:8px;
+    width:34px;height:34px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+  .icon-btn:hover{background:rgba(0,0,0,.35);}
+  .icon-btn[disabled]{opacity:.35;cursor:not-allowed;}
+  .icon-btn.active{background:var(--gold);color:var(--ink-900);}
+  .rec-btn[disabled]{opacity:.35;cursor:not-allowed;}
+
+  /* ---------- BODY LAYOUT ---------- */
+  .workspace{
+    flex:1;
+    display:flex;
+    min-height:0;
+    overflow:hidden;
+  }
+
+  /* ---- LEFT TOOL RAIL (wood ledge) ---- */
+  .rail{
+    flex-shrink:0;
+    display:flex;
+    flex-direction:row;
+    background:linear-gradient(180deg,var(--ink-700),var(--ink-800) 55%,var(--ink-900));
+    overflow-y:auto;
+  }
+  .rail-tools{
+    width:60px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:12px 0;
+    gap:6px;
+    border-right:1px solid rgba(255,255,255,.06);
+  }
+  .rail-colors{
+    width:52px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:12px 0;
+    gap:10px;
+    border-right:1px solid rgba(255,255,255,.06);
+  }
+  .tool{
+    width:40px;height:40px;
+    border-radius:9px;
+    border:none;
+    background:transparent;
+    color:rgba(244,243,239,.75);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    transition:background .15s, color .15s;
+  }
+  .tool svg{width:19px;height:19px;}
+  .tool:hover{background:rgba(255,255,255,.08);color:var(--paper-tint);}
+  .tool.active{
+    background:var(--gold);
+    color:var(--ink-900);
+  }
+  .rail-sep{width:28px;height:1px;background:rgba(255,255,255,.1);margin:2px 0;}
+
+  .width-picker{display:flex;flex-direction:column;gap:6px;align-items:center;}
+  .width-dot{
+    width:32px;height:32px;border-radius:8px;
+    background:transparent;
+    border:none;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+  .width-dot.active{background:rgba(184,144,46,.18);}
+  .width-dot span{border-radius:50%;background:rgba(244,243,239,.75);display:block;}
+  .width-dot.active span{background:var(--gold);}
+
+  /* ---- CANVAS AREA ---- */
+  .board-area{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#e5e6ee;
+    padding:0;
+    min-width:0;
+    min-height:0;
+    overflow:hidden;
+    position:relative;
+  }
+  .board-frame{
+    position:relative;
+    width:100%;
+    height:100%;
+    box-shadow:0 1px 0 rgba(0,0,0,.08);
+    overflow:hidden;
+  }
+  canvas{
+    display:block;
+    width:100%;
+    height:100%;
+    touch-action:none;
+    cursor:crosshair;
+  }
+  .text-editor{
+    position:absolute;
+    min-width:120px;
+    min-height:28px;
+    background:transparent;
+    border:1px dashed var(--gold);
+    outline:none;
+    padding:2px 4px;
+    font-family:'Fraunces',serif;
+    line-height:1.2;
+    resize:none;
+    overflow:hidden;
+  }
+
+  .chalk-sticks{display:flex;flex-direction:column;gap:8px;align-items:center;}
+  .chalk{
+    width:24px;height:24px;
+    border-radius:50%;
+    cursor:pointer;
+    box-shadow:0 0 0 2px rgba(255,255,255,.08);
+    border:2px solid rgba(0,0,0,.15);
+    transition:transform .12s, box-shadow .12s;
+  }
+  .chalk:hover{transform:scale(1.08);}
+  .chalk.active{box-shadow:0 0 0 2px var(--ink-800), 0 0 0 4px var(--gold);}
+
+  .bg-picker{display:flex;flex-direction:column;gap:6px;align-items:center;}
+  .bg-swatch{
+    width:26px;height:22px;border-radius:4px;
+    border:2px solid rgba(247,244,234,.25);
+    cursor:pointer;
+  }
+  .bg-swatch.active{border-color:var(--gold);}
+
+  #file-input{display:none;}
+
+  .toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:var(--ink-900);color:var(--paper-tint);
+    padding:10px 18px;border-radius:8px;font-size:13px;
+    box-shadow:0 4px 14px rgba(0,0,0,.4);
+    opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;
+    z-index:50;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
+
+  .result-panel{
+    position:fixed;inset:0;background:rgba(0,0,0,.7);
+    display:none;align-items:center;justify-content:center;z-index:60;
+  }
+  .result-panel.show{display:flex;}
+  .result-card{
+    background:var(--board-light);color:var(--ink-900);
+    border-radius:12px;padding:20px;max-width:520px;width:90%;
+    box-shadow:0 20px 50px rgba(0,0,0,.5);
+  }
+  .result-card h3{font-family:'Fraunces',serif;margin:0 0 10px;font-size:22px;}
+  .result-card video{width:100%;border-radius:8px;background:#000;max-height:280px;}
+  .result-actions{display:flex;gap:10px;margin-top:14px;}
+  .btn{
+    padding:9px 16px;border-radius:8px;border:none;
+    font-family:'Inter';font-weight:600;font-size:13px;cursor:pointer;
+  }
+  .btn-primary{background:var(--ink-700);color:var(--paper-tint);}
+  .btn-ghost{background:#eceef5;color:var(--ink-900);}
+
+  @media (max-width:820px){
+    header{padding:8px 10px;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+    header::-webkit-scrollbar{display:none;}
+    header > *{flex-shrink:0;}
+    .pages-strip{flex:0 0 auto;max-width:120px;}
+    .brand{font-size:14px;}
+    #undo-btn span{display:none;}
+    #rec-label{display:none;}
+    .rec-btn{padding:8px 10px;}
+    .add-page span{display:none;}
+    .add-page{padding:0 10px;}
+    #live-label{display:none;}
+    #live-btn{padding:8px 10px;}
+
+    .workspace{flex-direction:column;}
+    .rail{
+      order:2;
+      width:100%;height:56px;
+      flex-direction:row;
+      overflow-x:auto;
+      overflow-y:hidden;
+      border-top:1px solid rgba(255,255,255,.06);
+    }
+    .rail-tools, .rail-colors{
+      flex-direction:row;
+      width:auto;
+      flex-shrink:0;
+      padding:6px 8px;
+    }
+    .tool{width:38px;height:38px;flex-shrink:0;}
+    .rail-sep{width:1px;height:28px;flex-shrink:0;margin:0 4px;}
+    .width-picker{flex-direction:row;flex-shrink:0;}
+    .chalk-sticks, .bg-picker{flex-direction:row;}
+
+    .board-area{order:1;padding:0;}
+    .board-frame{
+      box-shadow:0 1px 0 rgba(0,0,0,.08);
+    }
+
+    .chalk{width:22px;height:22px;}
+  }
+  @media (max-width:520px){
+    .pages-strip{max-width:38vw;}
+    header{flex-wrap:nowrap;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Tableau de leçons</div>
+  <div class="pages-strip" id="pages-strip"></div>
+  <button class="add-page" id="add-page" title="Ajouter une nouvelle page">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Page
+  </button>
+  <div class="record-zone">
+    <button class="rec-btn" id="undo-btn" title="Revenir en arrière (annuler le dernier trait)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>
+      <span>Retour arrière</span>
+    </button>
+    <button class="icon-btn" id="redo-btn" title="Rétablir">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg>
+    </button>
+    <span class="rec-time" id="rec-time">00:00</span>
+    <button class="rec-btn" id="rec-btn">
+      <span class="rec-dot"></span><span id="rec-label">Enregistrer</span>
+    </button>
+    <button class="icon-btn" id="export-btn" title="Exporter la page en image">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </button>
+    <button class="icon-btn" id="cam-btn" title="Activer/désactiver ma caméra">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>
+    </button>
+    <button class="rec-btn" id="live-btn" title="Démarrer ou rejoindre une session en direct">
+      <span style="width:9px;height:9px;border-radius:50%;background:var(--status-green);display:inline-block;"></span>
+      <span id="live-label">Session en direct</span>
+    </button>
+  </div>
+</header>
+
+<div class="workspace">
+  <div class="rail" id="rail">
+    <div class="rail-tools">
+      <button class="tool active" data-tool="pen" title="Crayon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+      </button>
+      <button class="tool" data-tool="eraser" title="Gomme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3a1 1 0 0 1 0-1.4l9.6-9.6a1 1 0 0 1 1.4 0l5.7 5.7a1 1 0 0 1 0 1.4L13 18"/><path d="M22 21H7"/></svg>
+      </button>
+      <button class="tool" data-tool="line" title="Ligne">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="19" x2="19" y2="5"/></svg>
+      </button>
+      <button class="tool" data-tool="rect" title="Rectangle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="6" width="16" height="12" rx="1"/></svg>
+      </button>
+      <button class="tool" data-tool="ellipse" title="Ellipse">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="12" rx="8" ry="6"/></svg>
+      </button>
+      <button class="tool" data-tool="text" title="Texte">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+      </button>
+      <button class="tool" data-tool="image" title="Insérer une image">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+      </button>
+      <button class="tool" data-tool="pdf" title="Importer un PDF (une page du tableau par page du PDF)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><text x="6.5" y="18" font-size="6.5" stroke="none" fill="currentColor" font-family="Inter,sans-serif" font-weight="700">PDF</text></svg>
+      </button>
+      <div class="rail-sep"></div>
+      <button class="icon-btn" id="clear-btn" title="Effacer la page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button>
+    </div>
+    <div class="rail-colors">
+      <div class="width-picker">
+        <div class="width-dot" data-w="3" title="Fin"><span style="width:5px;height:5px;"></span></div>
+        <div class="width-dot active" data-w="7" title="Moyen"><span style="width:9px;height:9px;"></span></div>
+        <div class="width-dot" data-w="14" title="Épais"><span style="width:14px;height:14px;"></span></div>
+      </div>
+      <div class="rail-sep"></div>
+      <div class="chalk-sticks" id="chalk-sticks"></div>
+      <div class="rail-sep"></div>
+      <div class="bg-picker" id="bg-picker"></div>
+    </div>
+  </div>
+
+  <div class="board-area">
+    <div class="board-frame" id="board-frame">
+      <canvas id="board" width="1280" height="720"></canvas>
+      <div id="cam-pip" style="display:none;position:absolute;bottom:16px;right:16px;width:150px;height:112px;border-radius:12px;overflow:hidden;border:3px solid var(--gold);box-shadow:0 6px 18px rgba(0,0,0,.4);z-index:20;background:#000;">
+        <video id="cam-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;transform:scaleX(-1);"></video>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<input type="file" id="file-input" accept="image/*">
+<input type="file" id="pdf-input" accept="application/pdf">
+
+<div class="result-panel" id="live-modal">
+  <div class="result-card" style="max-width:420px;">
+    <h3 id="live-modal-title">Session en direct</h3>
+    <div id="live-modal-body">
+      <div style="display:flex;gap:8px;margin-bottom:18px;">
+        <button class="btn btn-primary" id="live-tab-create" style="flex:1;">Créer une session</button>
+        <button class="btn btn-ghost" id="live-tab-join" style="flex:1;">Rejoindre</button>
+      </div>
+
+      <div id="live-panel-create">
+        <p style="font-size:13px;color:#5b6178;margin:0 0 14px;">
+          Tu deviens le point central de la session : les élèves t'entendront automatiquement et pourront écrire sur le tableau avec toi.
+        </p>
+        <button class="btn btn-primary" id="live-start-btn" style="width:100%;">Démarrer la session</button>
+      </div>
+
+      <div id="live-panel-join" style="display:none;">
+        <input type="text" id="live-name-input" placeholder="Ton prénom" style="width:100%;padding:9px 12px;border-radius:8px;border:1px solid #d6d9e6;margin-bottom:10px;font-family:'Inter';font-size:14px;box-sizing:border-box;">
+        <input type="text" id="live-code-input" placeholder="Code de la session (ex: KX7F2Q)" style="width:100%;padding:9px 12px;border-radius:8px;border:1px solid #d6d9e6;margin-bottom:14px;font-family:'Inter';font-size:14px;box-sizing:border-box;text-transform:uppercase;">
+        <button class="btn btn-primary" id="live-join-btn" style="width:100%;">Rejoindre la session</button>
+      </div>
+
+      <p id="live-status" style="font-size:13px;color:#5b6178;margin:14px 0 0;min-height:18px;"></p>
+    </div>
+    <div class="result-actions">
+      <button class="btn btn-ghost" id="live-modal-close">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div id="live-bar" style="display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink-900);color:var(--paper-tint);border-radius:24px;padding:8px 10px 8px 16px;box-shadow:0 6px 20px rgba(0,0,0,.4);display:flex;align-items:center;gap:10px;z-index:55;font-family:'Inter';font-size:13px;max-width:92vw;">
+  <span id="live-bar-code" style="font-weight:600;color:var(--gold);white-space:nowrap;"></span>
+  <span id="live-bar-participants" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;opacity:.85;"></span>
+  <button id="live-talk-btn" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:16px;padding:6px 14px;font-weight:600;font-size:12px;cursor:pointer;white-space:nowrap;">🎤 Parler</button>
+  <button id="live-leave-btn" style="background:var(--record-red);border:none;color:#fff;border-radius:16px;padding:6px 14px;font-weight:600;font-size:12px;cursor:pointer;white-space:nowrap;">Quitter</button>
+</div>
+<div id="live-audio-sinks" style="display:none;"></div>
+<div class="toast" id="toast"></div>
+
+<div class="result-panel" id="result-panel">
+  <div class="result-card">
+    <h3>Leçon enregistrée</h3>
+    <video id="result-video" controls></video>
+    <div class="result-actions">
+      <a class="btn btn-primary" id="download-link" download="lecon.webm">Télécharger la vidéo</a>
+      <button class="btn btn-ghost" id="close-result">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('board');
+  const ctx = canvas.getContext('2d');
+  const boardFrame = document.getElementById('board-frame');
+
+  const CHALKS = [
+    {name:'Noir', hex:'#1B2340'},
+    {name:'Rouge', hex:'#C6423F'},
+    {name:'Bleu', hex:'#2C5AC7'},
+    {name:'Vert', hex:'#2F8F5B'},
+    {name:'Or', hex:'#B8902E'},
+    {name:'Blanc', hex:'#F4F3EF'},
+  ];
+  const BACKGROUNDS = [
+    {id:'light', label:'Blanc', sw:'#faf9f5'},
+    {id:'dark', label:'Marine', sw:'#182047'},
+    {id:'lined', label:'Ligné', sw:'#faf9f5'},
+    {id:'grid', label:'Quadrillé', sw:'#faf9f5'},
+  ];
+
+  let state = {
+    tool: 'pen',
+    color: CHALKS[0].hex,
+    width: 7,
+    pageIndex: 0,
+    pages: [ newPage() ],
+  };
+  let history = [ { stack:[JSON.stringify([])], pointer:0 } ];
+  const imageCache = {};
+
+  function newPage(){
+    return { strokes: [], background: 'light', pdfBackground: null };
+  }
+  function currentPage(){ return state.pages[state.pageIndex]; }
+  function currentHistory(){ return history[state.pageIndex]; }
+
+  /* ---------- rendering ---------- */
+  function drawBackground(bg){
+    const w = canvas.width, h = canvas.height;
+    if(bg === 'dark'){
+      const g = ctx.createLinearGradient(0,0,0,h);
+      g.addColorStop(0,'#1B2340'); g.addColorStop(1,'#10132A');
+      ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+    } else {
+      ctx.fillStyle = '#faf9f5'; ctx.fillRect(0,0,w,h);
+    }
+    if(bg === 'lined'){
+      ctx.strokeStyle = 'rgba(30,36,66,.15)'; ctx.lineWidth = 1;
+      for(let y=60; y<h; y+=48){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+    }
+    if(bg === 'grid'){
+      ctx.strokeStyle = 'rgba(30,36,66,.15)'; ctx.lineWidth = 1;
+      for(let x=0; x<w; x+=40){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+      for(let y=0; y<h; y+=40){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+    }
+  }
+
+  function drawPdfBackground(page){
+    if(!page.pdfBackground) return;
+    const img = imageCache[page.pdfBackground];
+    if(!img) return;
+    const cw = canvas.width, ch = canvas.height;
+    const scale = Math.min(cw / img.width, ch / img.height);
+    const w = img.width * scale, h = img.height * scale;
+    const x = (cw - w) / 2, y = (ch - h) / 2;
+    ctx.drawImage(img, x, y, w, h);
+  }
+
+  function drawStroke(s){
+    if(s.type === 'path'){
+      if(s.points.length < 2) return;
+      ctx.strokeStyle = s.erase ? bgSolidColor(currentPage().background) : s.color;
+      ctx.lineWidth = s.width;
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(s.points[0][0], s.points[0][1]);
+      for(let i=1;i<s.points.length;i++) ctx.lineTo(s.points[i][0], s.points[i][1]);
+      ctx.stroke();
+    } else if(s.type === 'line'){
+      ctx.strokeStyle = s.color; ctx.lineWidth = s.width; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(s.x1,s.y1); ctx.lineTo(s.x2,s.y2); ctx.stroke();
+    } else if(s.type === 'rect'){
+      ctx.strokeStyle = s.color; ctx.lineWidth = s.width;
+      ctx.strokeRect(Math.min(s.x1,s.x2), Math.min(s.y1,s.y2), Math.abs(s.x2-s.x1), Math.abs(s.y2-s.y1));
+    } else if(s.type === 'ellipse'){
+      ctx.strokeStyle = s.color; ctx.lineWidth = s.width;
+      const cx=(s.x1+s.x2)/2, cy=(s.y1+s.y2)/2, rx=Math.abs(s.x2-s.x1)/2, ry=Math.abs(s.y2-s.y1)/2;
+      ctx.beginPath(); ctx.ellipse(cx,cy,Math.max(rx,1),Math.max(ry,1),0,0,Math.PI*2); ctx.stroke();
+    } else if(s.type === 'text'){
+      ctx.fillStyle = s.color;
+      ctx.font = `${s.size}px 'Fraunces', serif`;
+      s.text.split('\n').forEach((line,i)=> ctx.fillText(line, s.x, s.y + i*(s.size*1.2)));
+    } else if(s.type === 'image' && imageCache[s.src]){
+      ctx.drawImage(imageCache[s.src], s.x, s.y, s.w, s.h);
+    }
+  }
+
+  function bgSolidColor(bg){ return bg==='dark' ? '#182047' : '#faf9f5'; }
+
+  function renderPage(){
+    drawBackground(currentPage().background);
+    drawPdfBackground(currentPage());
+    currentPage().strokes.forEach(drawStroke);
+  }
+
+  /* ---------- history ---------- */
+  function commit(){
+    const h = currentHistory();
+    h.stack = h.stack.slice(0, h.pointer+1);
+    h.stack.push(JSON.stringify(currentPage().strokes));
+    h.pointer++;
+    refreshThumb();
+    updateUndoRedoButtons();
+  }
+  function undo(){
+    const h = currentHistory();
+    if(h.pointer <= 0) return;
+    h.pointer--;
+    currentPage().strokes = JSON.parse(h.stack[h.pointer]);
+    renderPage(); refreshThumb(); updateUndoRedoButtons();
+  }
+  function redo(){
+    const h = currentHistory();
+    if(h.pointer >= h.stack.length-1) return;
+    h.pointer++;
+    currentPage().strokes = JSON.parse(h.stack[h.pointer]);
+    renderPage(); refreshThumb(); updateUndoRedoButtons();
+  }
+  function updateUndoRedoButtons(){
+    const h = currentHistory();
+    document.getElementById('undo-btn').disabled = h.pointer<=0;
+    document.getElementById('redo-btn').disabled = h.pointer>=h.stack.length-1;
+  }
+
+  /* ---------- pointer coords ---------- */
+  function toCanvasCoords(e){
+    const r = canvas.getBoundingClientRect();
+    const sx = canvas.width / r.width, sy = canvas.height / r.height;
+    return [ (e.clientX - r.left) * sx, (e.clientY - r.top) * sy ];
+  }
+
+  /* ---------- drawing interaction ---------- */
+  let drawing = false, current = null, startPt = null;
+
+  canvas.addEventListener('pointerdown', (e)=>{
+    if(state.tool === 'image' || state.tool === 'pdf') return;
+    if(state.tool === 'text'){ openTextEditor(e); return; }
+    canvas.setPointerCapture(e.pointerId);
+    drawing = true;
+    const [x,y] = toCanvasCoords(e);
+    startPt = [x,y];
+    if(state.tool === 'pen' || state.tool === 'eraser'){
+      current = { type:'path', points:[[x,y]], color: state.color, width: state.tool==='eraser'? state.width*3 : state.width, erase: state.tool==='eraser' };
+    } else {
+      current = { type: state.tool, x1:x, y1:y, x2:x, y2:y, color: state.color, width: state.width };
+    }
+  });
+
+  canvas.addEventListener('pointermove', (e)=>{
+    if(!drawing) return;
+    const [x,y] = toCanvasCoords(e);
+    if(current.type === 'path'){
+      current.points.push([x,y]);
+      drawStroke({ type:'path', points: current.points.slice(-2), color: current.color, width: current.width, erase: current.erase });
+    } else {
+      current.x2 = x; current.y2 = y;
+      renderPage();
+      drawStroke(current);
+    }
+  });
+
+  function finishStroke(){
+    if(!drawing) return;
+    drawing = false;
+    if(current){
+      if(current.type!=='path' || current.points.length>1){
+        currentPage().strokes.push(current);
+        commit();
+        liveBroadcast({ kind:'stroke', pageIndex: state.pageIndex, stroke: current });
+      }
+    }
+    current = null;
+    renderPage();
+  }
+  canvas.addEventListener('pointerup', finishStroke);
+  canvas.addEventListener('pointercancel', finishStroke);
+  canvas.addEventListener('pointerleave', ()=>{ if(drawing) finishStroke(); });
+
+  /* ---------- text tool ---------- */
+  function openTextEditor(e){
+    const r = canvas.getBoundingClientRect();
+    const [cx,cy] = toCanvasCoords(e);
+    const el = document.createElement('textarea');
+    el.className = 'text-editor';
+    el.style.left = (e.clientX - r.left - boardFrame.getBoundingClientRect().left + boardFrame.getBoundingClientRect().left) + 'px';
+    const frameRect = boardFrame.getBoundingClientRect();
+    el.style.left = (e.clientX - frameRect.left) + 'px';
+    el.style.top = (e.clientY - frameRect.top - 14) + 'px';
+    el.style.color = state.color;
+    el.style.fontSize = Math.max(16, state.width*4) + 'px';
+    boardFrame.appendChild(el);
+    el.focus();
+    el.addEventListener('blur', ()=>{
+      const text = el.value.trim();
+      boardFrame.removeChild(el);
+      if(text){
+        currentPage().strokes.push({ type:'text', x:cx, y:cy, text, color: state.color, size: Math.max(16, state.width*4)*(canvas.width/frameRect.width) });
+        commit(); renderPage();
+      }
+    });
+  }
+
+  /* ---------- image tool ---------- */
+  const fileInput = document.getElementById('file-input');
+  const pdfInput = document.getElementById('pdf-input');
+  document.querySelectorAll('.tool').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      state.tool = btn.dataset.tool;
+      if(state.tool === 'image') fileInput.click();
+      if(state.tool === 'pdf') pdfInput.click();
+    });
+  });
+  fileInput.addEventListener('change', ()=>{
+    const file = fileInput.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const src = reader.result;
+      const img = new Image();
+      img.onload = ()=>{
+        imageCache[src] = img;
+        const maxW = canvas.width*0.5;
+        const scale = Math.min(1, maxW/img.width);
+        const w = img.width*scale, h = img.height*scale;
+        const x = (canvas.width-w)/2, y=(canvas.height-h)/2;
+        currentPage().strokes.push({ type:'image', src, x, y, w, h });
+        commit(); renderPage();
+      };
+      img.src = src;
+    };
+    reader.readAsDataURL(file);
+    fileInput.value = '';
+    document.querySelector('.tool[data-tool="pen"]').click();
+  });
+
+  /* ---------- pdf import ---------- */
+  function loadImage(src){
+    return new Promise((resolve, reject)=>{
+      const im = new Image();
+      im.onload = ()=> resolve(im);
+      im.onerror = reject;
+      im.src = src;
+    });
+  }
+
+  async function importPdf(file){
+    if(!window.pdfjsLib){
+      showToast("La bibliothèque PDF n'a pas pu se charger (vérifie ta connexion internet)");
+      return;
+    }
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    showToast('Lecture du PDF…');
+    try{
+      const buf = await file.arrayBuffer();
+      // disableWorker avoids spawning a separate cross-origin worker thread,
+      // which browsers block on file:// pages (origin "null") — this is
+      // exactly what made PDFs fail while plain image import kept working.
+      const pdf = await pdfjsLib.getDocument({ data: buf, disableWorker: true }).promise;
+      const total = pdf.numPages;
+      let firstImportedIndex = null;
+
+      for(let i=1; i<=total; i++){
+        showToast(`Import de la page ${i}/${total}…`);
+        const page = await pdf.getPage(i);
+        const baseViewport = page.getViewport({ scale: 1 });
+        const scale = Math.min(2.2, 1600 / baseViewport.width);
+        const viewport = page.getViewport({ scale });
+        const off = document.createElement('canvas');
+        off.width = viewport.width; off.height = viewport.height;
+        await page.render({ canvasContext: off.getContext('2d'), viewport }).promise;
+        const dataUrl = off.toDataURL('image/jpeg', 0.85);
+        const img = await loadImage(dataUrl);
+        imageCache[dataUrl] = img;
+
+        let targetIndex;
+        if(i === 1 && currentPage().strokes.length === 0 && !currentPage().pdfBackground){
+          targetIndex = state.pageIndex;
+        } else {
+          state.pages.push({ strokes: [], background: 'light', pdfBackground: null });
+          history.push({ stack:[JSON.stringify([])], pointer:0 });
+          targetIndex = state.pages.length - 1;
+        }
+        state.pages[targetIndex].pdfBackground = dataUrl;
+        state.pages[targetIndex].background = 'light';
+        if(firstImportedIndex === null) firstImportedIndex = targetIndex;
+      }
+
+      switchPage(firstImportedIndex);
+      showToast(`${total} page${total>1?'s':''} importée${total>1?'s':''} depuis le PDF — dessine par-dessus`);
+    }catch(err){
+      console.error(err);
+      showToast("Impossible de lire ce PDF (" + (err && err.message ? err.message : "erreur inconnue") + ")");
+    }
+  }
+
+  pdfInput.addEventListener('change', ()=>{
+    const file = pdfInput.files[0];
+    if(!file) return;
+    importPdf(file);
+    pdfInput.value = '';
+    document.querySelector('.tool[data-tool="pen"]').click();
+  });
+
+  /* ---------- width picker ---------- */
+  document.querySelectorAll('.width-dot').forEach(d=>{
+    d.addEventListener('click', ()=>{
+      document.querySelectorAll('.width-dot').forEach(x=>x.classList.remove('active'));
+      d.classList.add('active');
+      state.width = parseInt(d.dataset.w,10);
+    });
+  });
+
+  /* ---------- chalk colors ---------- */
+  const chalkSticks = document.getElementById('chalk-sticks');
+  CHALKS.forEach((c,i)=>{
+    const el = document.createElement('div');
+    el.className = 'chalk' + (i===0?' active':'');
+    el.style.background = c.hex;
+    el.title = c.name;
+    el.addEventListener('click', ()=>{
+      document.querySelectorAll('.chalk').forEach(x=>x.classList.remove('active'));
+      el.classList.add('active');
+      state.color = c.hex;
+    });
+    chalkSticks.appendChild(el);
+  });
+
+  /* ---------- background picker ---------- */
+  const bgPicker = document.getElementById('bg-picker');
+  BACKGROUNDS.forEach((b,i)=>{
+    const el = document.createElement('div');
+    el.className = 'bg-swatch' + (i===0?' active':'');
+    el.style.background = b.sw;
+    el.title = b.label;
+    el.addEventListener('click', ()=>{
+      document.querySelectorAll('.bg-swatch').forEach(x=>x.classList.remove('active'));
+      el.classList.add('active');
+      currentPage().background = b.id;
+      commit(); renderPage();
+      liveBroadcast({ kind:'background', pageIndex: state.pageIndex, background: b.id });
+    });
+    bgPicker.appendChild(el);
+  });
+
+  /* ---------- pages ---------- */
+  const pagesStrip = document.getElementById('pages-strip');
+  function refreshThumb(){
+    const thumbs = pagesStrip.querySelectorAll('.page-thumb');
+    const t = thumbs[state.pageIndex];
+    if(t){ t.querySelector('img').src = canvas.toDataURL('image/png'); }
+  }
+  function renderThumbStrip(){
+    pagesStrip.innerHTML = '';
+    state.pages.forEach((p, idx)=>{
+      const el = document.createElement('div');
+      el.className = 'page-thumb' + (idx===state.pageIndex?' active':'');
+      const img = document.createElement('img');
+      el.appendChild(img);
+      const del = document.createElement('div');
+      del.className='del'; del.textContent='✕';
+      del.addEventListener('click', (ev)=>{ ev.stopPropagation(); deletePage(idx); });
+      el.appendChild(del);
+      el.addEventListener('click', ()=> switchPage(idx));
+      pagesStrip.appendChild(el);
+    });
+    requestAnimationFrame(()=>{
+      state.pages.forEach((p, idx)=>{
+        if(idx === state.pageIndex){
+          pagesStrip.children[idx].querySelector('img').src = canvas.toDataURL('image/png');
+        }
+      });
+    });
+  }
+  function switchPage(idx){
+    state.pageIndex = idx;
+    renderPage();
+    updateUndoRedoButtons();
+    syncBgPicker();
+    renderThumbStrip();
+  }
+  function syncBgPicker(){
+    document.querySelectorAll('.bg-swatch').forEach((el,i)=> el.classList.toggle('active', BACKGROUNDS[i].id === currentPage().background));
+  }
+  document.getElementById('add-page').addEventListener('click', ()=>{
+    state.pages.push(newPage());
+    history.push({ stack:[JSON.stringify([])], pointer:0 });
+    switchPage(state.pages.length-1);
+    showToast('Nouvelle page ajoutée');
+    liveBroadcast({ kind:'page-add' });
+  });
+  function deletePage(idx){
+    if(state.pages.length === 1){ showToast("Impossible de supprimer la seule page"); return; }
+    state.pages.splice(idx,1);
+    history.splice(idx,1);
+    if(state.pageIndex >= state.pages.length) state.pageIndex = state.pages.length-1;
+    switchPage(state.pageIndex);
+    liveBroadcast({ kind:'page-delete', pageIndex: idx });
+  }
+
+  /* ---------- undo/redo/clear buttons ---------- */
+  document.getElementById('undo-btn').addEventListener('click', undo);
+  document.getElementById('redo-btn').addEventListener('click', redo);
+  document.getElementById('clear-btn').addEventListener('click', ()=>{
+    currentPage().strokes = [];
+    commit(); renderPage();
+    liveBroadcast({ kind:'clear-page', pageIndex: state.pageIndex });
+  });
+
+  /* ---------- export page as image ---------- */
+  document.getElementById('export-btn').addEventListener('click', ()=>{
+    const a = document.createElement('a');
+    a.download = `page-${state.pageIndex+1}.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  });
+
+  /* ---------- toast ---------- */
+  let toastTimer;
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=> t.classList.remove('show'), 4200);
+  }
+
+  /* ---------- camera (PiP) ---------- */
+  let camStream = null, camActive = false;
+  const camVideo = document.getElementById('cam-video');
+  const camPip = document.getElementById('cam-pip');
+  const camBtn = document.getElementById('cam-btn');
+
+  function withTimeout(promise, ms, msg){
+    return Promise.race([
+      promise,
+      new Promise((_, reject)=> setTimeout(()=> reject(Object.assign(new Error(msg), { name:'TimeoutError' })), ms))
+    ]);
+  }
+
+  async function toggleCamera(){
+    if(camActive){
+      if(camStream) camStream.getTracks().forEach(t=>t.stop());
+      camStream = null; camActive = false;
+      camPip.style.display = 'none';
+      camBtn.classList.remove('active');
+      liveRefreshOutgoingMedia();
+      return;
+    }
+    if(!window.isSecureContext){
+      showToast("La caméra est bloquée : ouvre le fichier via une adresse https:// ou http://localhost, pas en double-cliquant dessus");
+      return;
+    }
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      showToast("Ce navigateur/cette appli ne permet pas l'accès à la caméra sur cette page — ouvre le lien dans un vrai navigateur (Chrome, Samsung Internet…)");
+      return;
+    }
+    showToast('Demande d\'accès à la caméra…');
+    try{
+      camStream = await withTimeout(
+        navigator.mediaDevices.getUserMedia({ video: { width:320, height:240 } }),
+        8000,
+        'timeout'
+      );
+    }catch(err){
+      if(err.name === 'TimeoutError'){
+        showToast("La caméra ne répond pas. Si tu ouvres cette page depuis une appli (fichiers, messagerie…) plutôt qu'un vrai navigateur, ouvre-la plutôt dans Chrome ou Samsung Internet.");
+      } else if(err.name === 'NotAllowedError'){
+        showToast("Caméra refusée : autorise l'accès dans les réglages du navigateur");
+      } else if(err.name === 'NotFoundError'){
+        showToast("Aucune caméra détectée sur cet appareil");
+      } else {
+        showToast("Caméra indisponible (" + (err.name||'erreur') + ")");
+      }
+      return;
+    }
+    camVideo.srcObject = camStream;
+    camPip.style.display = 'block';
+    camActive = true;
+    camBtn.classList.add('active');
+    liveRefreshOutgoingMedia();
+  }
+  camBtn.addEventListener('click', toggleCamera);
+
+  function roundRectPath(c, x, y, w, h, r){
+    c.beginPath();
+    c.moveTo(x+r,y);
+    c.arcTo(x+w,y,x+w,y+h,r);
+    c.arcTo(x+w,y+h,x,y+h,r);
+    c.arcTo(x,y+h,x,y,r);
+    c.arcTo(x,y,x+w,y,r);
+    c.closePath();
+  }
+
+  /* ---------- recording ---------- */
+  let mediaRecorder, chunks=[], micStream=null, isRecording=false, isPaused=false, timerInterval, seconds=0;
+  const recBtn = document.getElementById('rec-btn');
+  const recLabel = document.getElementById('rec-label');
+  const recTime = document.getElementById('rec-time');
+
+  function fmtTime(s){
+    const m = Math.floor(s/60).toString().padStart(2,'0');
+    const sec = (s%60).toString().padStart(2,'0');
+    return `${m}:${sec}`;
+  }
+
+  let recCanvas = null, recCtx = null, recRAF = null;
+  function recordCompositeFrame(){
+    recCtx.drawImage(canvas, 0, 0, recCanvas.width, recCanvas.height);
+    if(camActive && camVideo.readyState >= 2){
+      const pw = 300, ph = 224, margin = 24;
+      const px = recCanvas.width - pw - margin, py = recCanvas.height - ph - margin;
+      recCtx.save();
+      roundRectPath(recCtx, px, py, pw, ph, 16);
+      recCtx.clip();
+      recCtx.save();
+      recCtx.translate(px+pw, py);
+      recCtx.scale(-1,1);
+      recCtx.drawImage(camVideo, 0, 0, pw, ph);
+      recCtx.restore();
+      recCtx.restore();
+      recCtx.lineWidth = 5; recCtx.strokeStyle = '#e8c468';
+      roundRectPath(recCtx, px, py, pw, ph, 16); recCtx.stroke();
+    }
+    recRAF = requestAnimationFrame(recordCompositeFrame);
+  }
+
+  async function startRecording(){
+    let canvasStream;
+    try{
+      if(camActive){
+        if(!recCanvas){ recCanvas = document.createElement('canvas'); recCtx = recCanvas.getContext('2d'); }
+        recCanvas.width = canvas.width; recCanvas.height = canvas.height;
+        recordCompositeFrame();
+        canvasStream = recCanvas.captureStream(30);
+      } else {
+        canvasStream = canvas.captureStream(30);
+      }
+    }catch(err){
+      showToast("L'enregistrement n'est pas pris en charge par ce navigateur");
+      return;
+    }
+    let audioTracks = [];
+    if(liveLocalStream){
+      // Session live déjà active (voir liveGetMic) : on RÉUTILISE ce
+      // micro déjà ouvert plutôt que d'en demander un second en
+      // parallèle. Deux flux getUserMedia({audio:true}) simultanés vers
+      // le même micro physique posent souci sur certains navigateurs/
+      // appareils (l'un des deux peut se couper ou rester muet selon le
+      // système audio de l'OS) — mieux vaut partager le même flux.
+      audioTracks = liveLocalStream.getAudioTracks();
+    } else if(!window.isSecureContext){
+      showToast("Le micro est bloqué : ouvre le fichier via une adresse https:// ou http://localhost, pas en double-cliquant dessus");
+    } else if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      showToast("Ce navigateur ne permet pas l'accès au micro sur cette page");
+    } else {
+      try{
+        micStream = await withTimeout(navigator.mediaDevices.getUserMedia({ audio:true }), 8000, 'timeout');
+        audioTracks = micStream.getAudioTracks();
+      }catch(err){
+        if(err.name === 'TimeoutError'){
+          showToast("Le micro ne répond pas — enregistrement lancé sans son. Essaie d'ouvrir la page dans un vrai navigateur si le son est nécessaire.");
+        } else if(err.name === 'NotAllowedError'){
+          showToast("Micro refusé : autorise l'accès au micro dans les réglages du navigateur puis réessaie");
+        } else if(err.name === 'NotFoundError'){
+          showToast("Aucun micro détecté sur cet appareil");
+        } else {
+          showToast('Micro indisponible : enregistrement vidéo seule (sans son)');
+        }
+      }
+    }
+    const combined = canvasStream;
+    audioTracks.forEach(t => combined.addTrack(t));
+    let mimeType = 'video/webm;codecs=vp8,opus';
+    if(!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=vp9,opus';
+    if(!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
+    chunks = [];
+    try{
+      mediaRecorder = new MediaRecorder(combined, { mimeType });
+    }catch(err){
+      showToast("Impossible de démarrer l'enregistrement");
+      return;
+    }
+    mediaRecorder.ondataavailable = (e)=>{ if(e.data.size>0) chunks.push(e.data); };
+    mediaRecorder.onstop = ()=>{
+      const blob = new Blob(chunks, { type:'video/webm' });
+      const url = URL.createObjectURL(blob);
+      const video = document.getElementById('result-video');
+      video.src = url;
+      const link = document.getElementById('download-link');
+      link.href = url;
+      const stamp = new Date();
+      const name = `lecon-${stamp.getFullYear()}${String(stamp.getMonth()+1).padStart(2,'0')}${String(stamp.getDate()).padStart(2,'0')}-${String(stamp.getHours()).padStart(2,'0')}${String(stamp.getMinutes()).padStart(2,'0')}.webm`;
+      link.download = name;
+      document.getElementById('result-panel').classList.add('show');
+      if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream=null; }
+      if(recRAF){ cancelAnimationFrame(recRAF); recRAF = null; }
+    };
+    mediaRecorder.start();
+    isRecording = true; isPaused = false; seconds = 0;
+    recBtn.classList.add('recording');
+    recLabel.textContent = 'Arrêter';
+    timerInterval = setInterval(()=>{ seconds++; recTime.textContent = fmtTime(seconds); }, 1000);
+  }
+  function stopRecording(){
+    if(mediaRecorder && isRecording){
+      mediaRecorder.stop();
+    }
+    isRecording = false;
+    recBtn.classList.remove('recording');
+    recLabel.textContent = 'Enregistrer';
+    clearInterval(timerInterval);
+  }
+  recBtn.addEventListener('click', ()=>{
+    if(!isRecording) startRecording(); else stopRecording();
+  });
+  document.getElementById('close-result').addEventListener('click', ()=>{
+    document.getElementById('result-panel').classList.remove('show');
+    recTime.textContent = '00:00';
+  });
+
+  /* ---------- resize ---------- */
+  const boardArea = document.querySelector('.board-area');
+  function fitBoard(){
+    renderPage();
+  }
+  window.addEventListener('resize', fitBoard);
+  window.addEventListener('orientationchange', ()=> setTimeout(fitBoard, 200));
+
+  /* ===================================================================
+     SESSION EN DIRECT (WebRTC via PeerJS) — module isolé exprès :
+     c'est la partie qu'on remplacera par une solution pro (LiveKit,
+     Daily, Agora…) plus tard, sans toucher au reste du tableau.
+     Architecture en étoile : chaque élève ne parle qu'à l'enseignant
+     (l'hôte), qui relaie l'audio et les événements de dessin aux autres.
+  =================================================================== */
+  let liveRole = null;        // 'host' | 'student' | null
+  let livePeer = null;        // objet Peer (PeerJS)
+  let liveHostId = null;      // code de session = id Peer de l'hôte
+  const liveConns = new Map();  // (hôte) peerId -> { conn, call, name }
+  let liveHostConn = null;      // (élève) connexion data vers l'hôte
+  let liveLocalStream = null;   // flux micro local
+  let liveTalkCall = null;      // (élève) appel sortant quand on "Parle"
+  const liveRelayCalls = new Map(); // (hôte) sourcePeerId -> [calls relayés]
+
+  function genRoomCode(){
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = 'KX';
+    for(let i=0;i<5;i++) code += chars[Math.floor(Math.random()*chars.length)];
+    return code;
+  }
+
+  function liveIsActive(){ return liveRole !== null; }
+
+  function liveSetStatus(msg){
+    const el = document.getElementById('live-status');
+    if(el) el.textContent = msg;
+  }
+
+  function liveAudioEl(id){
+    let el = document.getElementById('live-audio-' + id);
+    if(!el){
+      el = document.createElement('audio');
+      el.id = 'live-audio-' + id;
+      el.autoplay = true;
+      el.setAttribute('playsinline', '');
+      document.getElementById('live-audio-sinks').appendChild(el);
+    }
+    return el;
+  }
+
+  /* Affiche un flux entrant : audio seul → lecteur invisible ; flux avec
+     vidéo (caméra de l'enseignant) → petite fenêtre incrustée sur le
+     tableau de l'élève, au même endroit que la PiP locale de l'hôte. */
+  function liveShowRemoteMedia(id, stream){
+    if(stream.getVideoTracks().length === 0){
+      const el = liveAudioEl(id);
+      el.srcObject = stream;
+      return;
+    }
+    let box = document.getElementById('live-cam-' + id);
+    if(!box){
+      box = document.createElement('div');
+      box.id = 'live-cam-' + id;
+      box.style.cssText = 'position:absolute;bottom:16px;right:16px;width:150px;height:112px;border-radius:12px;overflow:hidden;border:3px solid var(--gold);box-shadow:0 6px 18px rgba(0,0,0,.4);z-index:20;background:#000;';
+      const video = document.createElement('video');
+      video.autoplay = true; video.setAttribute('playsinline','');
+      video.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+      box.appendChild(video);
+      document.getElementById('board-frame').appendChild(box);
+    }
+    box.querySelector('video').srcObject = stream;
+    box.style.display = 'block';
+  }
+
+  function liveUpdateBar(){
+    const bar = document.getElementById('live-bar');
+    const codeEl = document.getElementById('live-bar-code');
+    const partsEl = document.getElementById('live-bar-participants');
+    if(!liveIsActive()){ bar.style.display = 'none'; return; }
+    bar.style.display = 'flex';
+    codeEl.textContent = liveRole === 'host' ? liveHostId : liveHostId;
+    if(liveRole === 'host'){
+      const names = Array.from(liveConns.values()).map(c=>c.name);
+      partsEl.textContent = names.length ? names.join(', ') : 'en attente d\'élèves…';
+    } else {
+      partsEl.textContent = 'connecté';
+    }
+  }
+
+  /* ---- appliquer un événement de dessin reçu (hôte ET élève) ---- */
+  function liveApplyEvent(msg){
+    if(msg.kind === 'stroke'){
+      const page = state.pages[msg.pageIndex];
+      if(!page) return;
+      if(msg.stroke.type === 'image' && msg.stroke.src && !imageCache[msg.stroke.src]){
+        loadImage(msg.stroke.src).then(img=>{ imageCache[msg.stroke.src] = img; if(msg.pageIndex===state.pageIndex) renderPage(); });
+      }
+      page.strokes.push(msg.stroke);
+      const h = history[msg.pageIndex];
+      if(h){ h.stack = h.stack.slice(0, h.pointer+1); h.stack.push(JSON.stringify(page.strokes)); h.pointer++; }
+      if(msg.pageIndex === state.pageIndex){ renderPage(); updateUndoRedoButtons(); }
+    } else if(msg.kind === 'background'){
+      const page = state.pages[msg.pageIndex];
+      if(!page) return;
+      page.background = msg.background;
+      if(msg.pageIndex === state.pageIndex){ renderPage(); syncBgPicker(); }
+    } else if(msg.kind === 'clear-page'){
+      const page = state.pages[msg.pageIndex];
+      if(!page) return;
+      page.strokes = [];
+      const h = history[msg.pageIndex];
+      if(h){ h.stack = h.stack.slice(0, h.pointer+1); h.stack.push(JSON.stringify([])); h.pointer++; }
+      if(msg.pageIndex === state.pageIndex){ renderPage(); updateUndoRedoButtons(); }
+    } else if(msg.kind === 'page-add'){
+      state.pages.push(newPage());
+      history.push({ stack:[JSON.stringify([])], pointer:0 });
+      renderThumbStrip();
+    } else if(msg.kind === 'page-delete'){
+      if(state.pages.length <= 1) return;
+      state.pages.splice(msg.pageIndex,1);
+      history.splice(msg.pageIndex,1);
+      if(state.pageIndex >= state.pages.length) state.pageIndex = state.pages.length-1;
+      renderPage(); renderThumbStrip(); updateUndoRedoButtons();
+    } else if(msg.kind === 'full-sync'){
+      state.pages = msg.pages;
+      history.length = 0;
+      msg.pages.forEach(p=> history.push({ stack:[JSON.stringify(p.strokes)], pointer:0 }));
+      // recharge les images (import/PDF) référencées dans les traits reçus
+      msg.pages.forEach(p=>{
+        p.strokes.forEach(s=>{
+          if((s.type==='image') && s.src && !imageCache[s.src]) loadImage(s.src).then(img=> imageCache[s.src]=img);
+        });
+        if(p.pdfBackground && !imageCache[p.pdfBackground]) loadImage(p.pdfBackground).then(img=> imageCache[p.pdfBackground]=img);
+      });
+      state.pageIndex = Math.min(state.pageIndex, state.pages.length-1);
+      switchPage(state.pageIndex);
+    }
+  }
+
+  /* Envoie un événement local vers les autres participants. Ne fait rien
+     hors session — c'est pour ça que les fonctions de dessin peuvent
+     appeler liveBroadcast() sans jamais vérifier si une session existe. */
+  function liveBroadcast(msg){
+    if(!liveIsActive()) return;
+    if(liveRole === 'host'){
+      liveConns.forEach(c=> { try{ c.conn.send(msg); }catch(e){} });
+    } else if(liveHostConn && liveHostConn.open){
+      try{ liveHostConn.send(msg); }catch(e){}
+    }
+  }
+
+  /* ---- audio : diffuser un flux à un pair (utilisé par l'hôte pour
+     envoyer sa propre voix, et pour relayer la voix d'un élève aux autres) --- */
+  function liveCallPeer(peerId, stream){
+    if(!stream) return null;
+    const call = livePeer.call(peerId, stream);
+    return call;
+  }
+
+  /* Combine le micro de l'hôte + sa caméra (si activée) en un seul flux
+     à envoyer aux élèves. C'est ce flux qui est ré-ouvert à chaque
+     changement (caméra allumée/éteinte) et pour chaque nouvel arrivant. */
+  function liveComposeOutgoingStream(){
+    const tracks = [];
+    if(liveLocalStream) tracks.push(...liveLocalStream.getAudioTracks());
+    if(camActive && camStream) tracks.push(...camStream.getVideoTracks());
+    if(tracks.length === 0) return null;
+    return new MediaStream(tracks);
+  }
+
+  /* Ré-ouvre l'appel vers chaque élève connecté avec le flux à jour
+     (typiquement après un clic sur le bouton caméra). Ne fait rien si
+     aucune session n'est active ou si on est élève, pas hôte. */
+  function liveRefreshOutgoingMedia(){
+    if(liveRole !== 'host') return;
+    const stream = liveComposeOutgoingStream();
+    liveConns.forEach((c, peerId)=>{
+      if(c.call){ try{ c.call.close(); }catch(e){} }
+      c.call = stream ? liveCallPeer(peerId, stream) : null;
+    });
+  }
+
+  async function liveGetMic(){
+    if(liveLocalStream) return liveLocalStream;
+    if(!window.isSecureContext){
+      liveSetStatus("Le micro est bloqué : ouvre cette page via https:// (pas en double-cliquant sur le fichier).");
+      return null;
+    }
+    try{
+      liveLocalStream = await withTimeout(navigator.mediaDevices.getUserMedia({ audio:true }), 8000, 'timeout');
+      return liveLocalStream;
+    }catch(err){
+      if(err.name === 'TimeoutError'){
+        liveSetStatus("Le micro ne répond pas — ouvre cette page dans un vrai navigateur (pas via une appli de fichiers) pour que le son fonctionne.");
+      } else {
+        liveSetStatus("Micro indisponible (" + (err.name||'erreur') + ") — la session continue sans ton audio.");
+      }
+      return null;
+    }
+  }
+
+  /* ---------------------------- HÔTE ---------------------------- */
+  async function liveStartHost(forcedCode){
+    // forcedCode : utilisé par le pont KLASSX (voir tout en bas du
+    // fichier) pour imposer le code dérivé de la séance précise, afin
+    // que l'enseignant ET les élèves inscrits à CETTE séance se
+    // retrouvent automatiquement dans la même session, sans code à
+    // taper. Sans argument (usage autonome de l'outil), un code
+    // aléatoire est généré comme avant.
+    liveSetStatus('Connexion…');
+    const code = forcedCode || genRoomCode();
+    livePeer = new Peer(code, { debug: 0 });
+
+    livePeer.on('open', async (id)=>{
+      liveRole = 'host';
+      liveHostId = id;
+      await liveGetMic();
+      liveSetStatus('');
+      document.getElementById('live-modal').classList.remove('show');
+      liveUpdateBar();
+      showToast('Session démarrée — code : ' + id);
+    });
+
+    livePeer.on('error', (err)=>{
+      liveSetStatus("Erreur de connexion (" + err.type + "). Réessaie.");
+    });
+
+    livePeer.on('connection', (conn)=>{
+      const peerId = conn.peer;
+      conn.on('open', ()=>{
+        const entry = { conn, call:null, name: '…' };
+        liveConns.set(peerId, entry);
+        // envoie l'état complet du tableau au nouvel arrivant
+        conn.send({ kind:'full-sync', pages: state.pages, pageIndex: state.pageIndex });
+        const outStream = liveComposeOutgoingStream();
+        if(outStream) entry.call = liveCallPeer(peerId, outStream);
+        liveUpdateBar();
+      });
+      conn.on('data', (msg)=>{
+        if(msg.kind === 'hello'){
+          const c = liveConns.get(peerId);
+          if(c){ c.name = msg.name || 'Élève'; liveUpdateBar(); }
+          return;
+        }
+        liveApplyEvent(msg);
+        // relaie aux autres élèves (jamais à l'expéditeur)
+        liveConns.forEach((c, id)=>{ if(id !== peerId){ try{ c.conn.send(msg); }catch(e){} } });
+      });
+      conn.on('close', ()=>{
+        liveConns.delete(peerId);
+        (liveRelayCalls.get(peerId)||[]).forEach(c=>c.close());
+        liveRelayCalls.delete(peerId);
+        liveUpdateBar();
+      });
+    });
+
+    livePeer.on('call', (call)=>{
+      // un élève clique sur "Parler" : on reçoit son audio, on le joue,
+      // et on le relaie à tous les autres participants connectés.
+      call.answer();
+      call.on('stream', (remoteStream)=>{
+        const el = liveAudioEl(call.peer);
+        el.srcObject = remoteStream;
+        const relays = [];
+        liveConns.forEach((c, id)=>{
+          if(id !== call.peer){ relays.push(liveCallPeer(id, remoteStream)); }
+        });
+        liveRelayCalls.set(call.peer, relays);
+      });
+      call.on('close', ()=>{
+        (liveRelayCalls.get(call.peer)||[]).forEach(c=>c.close());
+        liveRelayCalls.delete(call.peer);
+      });
+    });
+  }
+
+  /* --------------------------- ÉLÈVE --------------------------- */
+  async function liveJoinAsStudent(name, hostId){
+    liveSetStatus('Connexion…');
+    livePeer = new Peer({ debug: 0 });
+
+    livePeer.on('open', ()=>{
+      liveHostId = hostId;
+      liveHostConn = livePeer.connect(hostId, { reliable: true });
+
+      liveHostConn.on('open', ()=>{
+        liveRole = 'student';
+        liveHostConn.send({ kind:'hello', name });
+        liveSetStatus('');
+        document.getElementById('live-modal').classList.remove('show');
+        liveUpdateBar();
+        showToast('Connecté à la session ' + hostId);
+      });
+      liveHostConn.on('data', (msg)=> liveApplyEvent(msg));
+      liveHostConn.on('close', ()=>{
+        showToast('La session est terminée (enseignant déconnecté)');
+        liveTeardown();
+      });
+    });
+
+    livePeer.on('call', (call)=>{
+      // flux poussé par l'hôte : audio seul (voix du prof ou d'un autre
+      // élève relayé), ou audio+vidéo si l'enseignant a activé sa caméra.
+      // La caméra utilise un id fixe (une seule source possible : le prof) ;
+      // l'audio relayé garde un id aléatoire (plusieurs élèves peuvent parler).
+      call.answer();
+      call.on('stream', (remoteStream)=>{
+        if(remoteStream.getVideoTracks().length){
+          liveShowRemoteMedia('host-cam', remoteStream);
+        } else {
+          const el = liveAudioEl(call.peer + '-' + Math.random().toString(36).slice(2,7));
+          el.srcObject = remoteStream;
+        }
+      });
+      call.on('close', ()=>{
+        const box = document.getElementById('live-cam-host-cam');
+        if(box) box.remove();
+      });
+    });
+
+    livePeer.on('error', (err)=>{
+      liveSetStatus("Impossible de rejoindre (" + err.type + "). Vérifie le code.");
+    });
+  }
+
+  function liveToggleTalk(){
+    const btn = document.getElementById('live-talk-btn');
+    if(liveTalkCall){
+      liveTalkCall.close();
+      liveTalkCall = null;
+      btn.textContent = '🎤 Parler';
+      btn.style.background = 'rgba(255,255,255,.15)';
+      return;
+    }
+    liveGetMic().then(stream=>{
+      if(!stream) return;
+      liveTalkCall = livePeer.call(liveHostId, stream);
+      btn.textContent = '🔴 En train de parler';
+      btn.style.background = 'var(--record-red)';
+      liveTalkCall.on('close', ()=>{
+        liveTalkCall = null;
+        btn.textContent = '🎤 Parler';
+        btn.style.background = 'rgba(255,255,255,.15)';
+      });
+    });
+  }
+
+  function liveTeardown(){
+    if(livePeer){ try{ livePeer.destroy(); }catch(e){} }
+    if(liveLocalStream){ liveLocalStream.getTracks().forEach(t=>t.stop()); liveLocalStream = null; }
+    liveRole = null; livePeer = null; liveHostId = null;
+    liveConns.clear(); liveHostConn = null; liveTalkCall = null; liveRelayCalls.clear();
+    document.getElementById('live-audio-sinks').innerHTML = '';
+    const remoteCam = document.getElementById('live-cam-host-cam');
+    if(remoteCam) remoteCam.remove();
+    liveUpdateBar();
+  }
+
+  /* ---- câblage de l'interface ---- */
+  const liveModal = document.getElementById('live-modal');
+  document.getElementById('live-btn').addEventListener('click', ()=>{
+    if(liveIsActive()) return; // le bandeau du bas gère déjà la session en cours
+    liveModal.classList.add('show');
+    liveSetStatus('');
+  });
+  document.getElementById('live-modal-close').addEventListener('click', ()=> liveModal.classList.remove('show'));
+  document.getElementById('live-tab-create').addEventListener('click', ()=>{
+    document.getElementById('live-panel-create').style.display = 'block';
+    document.getElementById('live-panel-join').style.display = 'none';
+    document.getElementById('live-tab-create').className = 'btn btn-primary';
+    document.getElementById('live-tab-join').className = 'btn btn-ghost';
+  });
+  document.getElementById('live-tab-join').addEventListener('click', ()=>{
+    document.getElementById('live-panel-create').style.display = 'none';
+    document.getElementById('live-panel-join').style.display = 'block';
+    document.getElementById('live-tab-join').className = 'btn btn-primary';
+    document.getElementById('live-tab-create').className = 'btn btn-ghost';
+  });
+  document.getElementById('live-start-btn').addEventListener('click', ()=> liveStartHost());
+  document.getElementById('live-join-btn').addEventListener('click', ()=>{
+    const name = document.getElementById('live-name-input').value.trim() || 'Élève';
+    const code = document.getElementById('live-code-input').value.trim().toUpperCase();
+    if(!code){ liveSetStatus('Entre le code de la session.'); return; }
+    liveJoinAsStudent(name, code);
+  });
+  document.getElementById('live-talk-btn').addEventListener('click', liveToggleTalk);
+  document.getElementById('live-leave-btn').addEventListener('click', ()=>{
+    liveTeardown();
+    showToast('Session quittée');
+  });
+
+  /* ---------- init ---------- */
+  ctx.textBaseline = 'top';
+  fitBoard();
+  renderPage();
+  renderThumbStrip();
+  updateUndoRedoButtons();
+  showToast('Prêt — choisis un outil et commence ta leçon');
+
+  /* ===================================================================
+     PONT KLASSX — connexion au backend, ajouté par-dessus l'outil
+     d'origine sans toucher au reste du fichier. Reçoit un message
+     "klassx-init" depuis la page React qui héberge ce fichier en
+     iframe (voir src/pages/Whiteboard.jsx), avec deux modes possibles :
+     - mode "session" : tableau lié à une séance précise — sauvegarde
+       serveur + connexion live automatique, code dérivé de la séance
+       (jamais tapé à la main), enseignant assigné ou élève inscrit
+       uniquement (vérifié côté serveur).
+     - mode "personal" : tableau personnel de découverte, sans séance —
+       sauvegarde serveur, mais pas de connexion live (personne d'autre
+       à qui se connecter).
+     =================================================================== */
+  window.addEventListener('message', async (event)=>{
+    const msg = event.data;
+    if(!msg || msg.kind !== 'klassx-init') return;
+    const { sessionId, accessToken, apiBase, role, studentName, mode } = msg;
+    const isPersonal = mode === 'personal';
+    const whiteboardPath = isPersonal ? '/me/whiteboard/' : `/class-sessions/${sessionId}/whiteboard/`;
+
+    async function apiCall(path, options={}){
+      const res = await fetch(`${apiBase}${path}`, {
+        ...options,
+        headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json', ...(options.headers||{}) },
+      });
+      if(!res.ok){
+        if(res.status === 403){
+          const body = await res.json().catch(()=>({}));
+          throw new Error(body.detail || "Accès refusé.");
+        }
+        throw new Error('Requête échouée : ' + res.status);
+      }
+      return res.json();
+    }
+
+    // 1. Charge le contenu déjà sauvegardé (s'il y en a).
+    try{
+      const data = await apiCall(whiteboardPath);
+      if(data.pages && data.pages.length){
+        state.pages = data.pages;
+        state.pageIndex = 0;
+        renderPage();
+        renderThumbStrip();
+      }
+    }catch(e){
+      showToast(e.message || "Impossible de charger le tableau sauvegardé.");
+      if(isPersonal) return; // période d'essai expirée ou compte non autorisé
+    }
+
+    // 2. Sauvegarde périodique + à la fermeture.
+    async function saveNow(){
+      try{ await apiCall(whiteboardPath, { method:'PUT', body: JSON.stringify({ pages: state.pages }) }); }
+      catch(e){ /* pas grave, on retentera au prochain cycle */ }
+    }
+    setInterval(saveNow, 20000);
+    window.addEventListener('beforeunload', saveNow);
+
+    if(isPersonal) return; // pas de session live pour un tableau personnel
+
+    // 3. Connexion automatique à la session live — code dérivé côté
+    //    serveur pour cette séance précise (voir
+    //    ClassSessionViewSet.whiteboard_room_code — l'accès y est déjà
+    //    vérifié : enseignant assigné ou élève inscrit uniquement).
+    try{
+      const { room_code } = await apiCall(`/class-sessions/${sessionId}/whiteboard-room-code/`);
+      if(role === 'teacher') liveStartHost(room_code);
+      else liveJoinAsStudent(studentName || 'Élève', room_code);
+    }catch(e){ showToast("Connexion à la session live impossible — le tableau reste utilisable seul."); }
+  });
+})();
+</script>
+</body>
+</html>

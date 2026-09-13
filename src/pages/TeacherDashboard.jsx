@@ -181,6 +181,8 @@ export default function TeacherDashboard() {
         <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 16 }}>{googleNotice}</p>
       )}
 
+      {settings && <TeacherVideoSettings settings={settings} onChange={setSettings} />}
+
       {todaySession && (
         <div className="card card-row today-card" style={{ marginBottom: 24 }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
@@ -352,18 +354,109 @@ export default function TeacherDashboard() {
             <IconVideo />
           </div>
           <div>
-            <h2>Mon profil</h2>
-            <p>Réglages de visioconférence et profil public — déplacés dans leur propre page.</p>
+            <h2>Mon profil public</h2>
+            <p>Matières et présentation visibles des élèves — sur sa propre page.</p>
           </div>
         </div>
         <Link to="/enseignant/parametres">
-          <button className="btn-primary">Gérer mon profil</button>
+          <button className="btn-primary">Gérer mon profil public</button>
         </Link>
       </div>
 
       <div style={{ marginTop: 24 }}>
         <TeacherSelfStudyContent />
       </div>
+    </div>
+  );
+}
+
+function TeacherVideoSettings({ settings, onChange }) {
+  const [defaultMeetingUrl, setDefaultMeetingUrl] = useState(settings.default_meeting_url || "");
+  const [saving, setSaving] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+  const [notice, setNotice] = useState("");
+
+  async function handleSaveLink(e) {
+    e.preventDefault();
+    setSaving(true);
+    setNotice("");
+    try {
+      const updated = await api.updateTeacherSettings({ default_meeting_url: defaultMeetingUrl });
+      onChange(updated);
+      setNotice("Lien enregistré.");
+    } catch (err) {
+      setNotice(err.message || "L'enregistrement a échoué.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleConnectGoogle() {
+    setConnecting(true);
+    setNotice("");
+    try {
+      const { authorization_url } = await api.connectGoogle();
+      window.location.href = authorization_url;
+    } catch (err) {
+      setNotice(err.message || "La connexion à Google n'est pas disponible pour le moment.");
+      setConnecting(false);
+    }
+  }
+
+  async function handleDisconnectGoogle() {
+    setConnecting(true);
+    try {
+      const updated = await api.disconnectGoogle();
+      onChange(updated);
+    } catch (err) {
+      setNotice(err.message || "La déconnexion a échoué.");
+    } finally {
+      setConnecting(false);
+    }
+  }
+
+  return (
+    <div className="card" style={{ display: "flex", flexDirection: "column", gap: 20, marginBottom: 24 }}>
+      <div>
+        <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 4px" }}>Compte Google</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 8px" }}>
+          Connectez votre compte Google pour qu'un lien Google Meet soit généré automatiquement, sur votre propre
+          calendrier, pour chaque séance que vous planifiez.
+        </p>
+        {settings.google_connected ? (
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 13 }}>Connecté : {settings.google_account_email}</span>
+            <button onClick={handleDisconnectGoogle} disabled={connecting}>
+              {connecting ? "…" : "Déconnecter"}
+            </button>
+          </div>
+        ) : (
+          <button className="btn-primary" onClick={handleConnectGoogle} disabled={connecting}>
+            {connecting ? "…" : "Connecter mon compte Google"}
+          </button>
+        )}
+      </div>
+
+      <form onSubmit={handleSaveLink}>
+        <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 4px" }}>Lien personnel (Zoom, Teams, ou Meet)</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 8px" }}>
+          Utilisé par défaut si vous n'avez pas connecté de compte Google, ou pour tout autre outil de visioconférence.
+        </p>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input
+            type="url"
+            placeholder="https://..."
+            value={defaultMeetingUrl}
+            onChange={(e) => setDefaultMeetingUrl(e.target.value)}
+            style={{ flex: 1 }}
+          />
+          <button type="submit" className="btn-primary" disabled={saving}>
+            {saving ? "…" : "Enregistrer"}
+          </button>
+        </div>
+      </form>
+
+      {notice && <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: 0 }}>{notice}</p>}
     </div>
   );
 }
