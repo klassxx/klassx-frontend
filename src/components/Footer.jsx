@@ -4,11 +4,11 @@ import { api } from "../api/client";
 import { IconInstagram, IconFacebook, IconLinkedin, IconTiktok, IconYoutube, IconSend } from "./Icons";
 
 const socialLinks = [
-  { label: "Instagram", href: "https://instagram.com/klassx", Icon: IconInstagram },
-  { label: "Facebook", href: "https://facebook.com/klassx", Icon: IconFacebook },
+  { label: "Instagram", href: "https://www.instagram.com/klassx.bac/", Icon: IconInstagram },
+  { label: "Facebook", href: "https://www.facebook.com/share/1HdBy7F23i/", Icon: IconFacebook },
   { label: "LinkedIn", href: "https://linkedin.com/company/klassx", Icon: IconLinkedin },
-  { label: "TikTok", href: "https://tiktok.com/@klassx", Icon: IconTiktok },
-  { label: "YouTube", href: "https://youtube.com/@klassx", Icon: IconYoutube },
+  { label: "TikTok", href: "https://www.tiktok.com/@klassx.bac.de.fran", Icon: IconTiktok },
+  { label: "YouTube", href: "https://www.youtube.com/channel/UCW3ZkP7yrDr3KSOCZ6lw9QA", Icon: IconYoutube },
 ];
 
 export default function Footer() {
