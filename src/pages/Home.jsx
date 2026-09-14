@@ -194,6 +194,11 @@ export default function Home() {
             title="Préparation au Grand Oral"
             description="Des séances individuelles dédiées à l'épreuve orale, pour arriver le jour J en confiance."
           />
+          <FeatureImageCard
+            image="/images/features/suivi-apres-seance.jpg"
+            title="Un suivi après chaque séance"
+            description="Nos enseignants partagent fiches et documents complémentaires après la séance, visibles uniquement par les élèves inscrits dans le groupe."
+          />
         </div>
       </section>
 
