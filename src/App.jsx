@@ -11,6 +11,7 @@ import Register from "./pages/Register";
 import Whiteboard from "./pages/Whiteboard";
 import Blog from "./pages/Blog";
 import Packs from "./pages/Packs";
+import InfoSession from "./pages/InfoSession";
 import BlogPostPage from "./pages/BlogPostPage";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -48,6 +49,7 @@ export default function App() {
           <Route path="/forum" element={<Forum />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/packs" element={<Packs />} />
+          <Route path="/seance-info" element={<InfoSession />} />
           <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route
             path="/chat-enseignant"

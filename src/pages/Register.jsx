@@ -168,6 +168,9 @@ export default function Register() {
               ...(isMinor ? { parent_full_name: form.parent_full_name } : {}),
             };
       await register(payload, accountType);
+      if (typeof window.gtag === "function") {
+        window.gtag("event", "sign_up", { account_type: accountType });
+      }
       navigate(
         accountType === "teacher" ? "/enseignant" : accountType === "affiliate" ? "/parrainage" : "/tableau-de-bord"
       );

@@ -168,6 +168,15 @@ export function IconYoutube(props) {
   );
 }
 
+export function IconWhatsapp(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M6.4 17.6 4.5 20l2.4-.6a7.9 7.9 0 1 0-2.9-3.2" />
+      <path d="M9.3 8.9c.2-.5.6-.5.9-.5s.5 0 .6.3c.2.4.6 1.4.6 1.6s0 .3-.2.5c-.2.3-.4.4-.6.6-.2.2-.4.4-.2.7.4.8 1.6 2 2.9 2.4.3.1.5 0 .7-.2.2-.2.5-.5.7-.7.2-.2.4-.2.6-.1.5.2 1.3.6 1.5.7.2.1.3.2.3.4 0 .3-.1.9-.4 1.2-.4.4-1.2.7-2.1.5-1.6-.3-3.4-1.3-4.6-2.8-1-1.2-1.6-2.5-1.7-3.2-.1-.6.1-1.1.4-1.4z" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export function IconSend(props) {
   return (
     <svg {...base} {...props}>

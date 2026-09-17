@@ -33,6 +33,13 @@ export default function Packs() {
     try {
       const data = await api.packCheckout(pack.id);
       if (data.checkout_url) {
+        if (typeof window.gtag === "function") {
+          window.gtag("event", "begin_checkout", {
+            currency: "EUR",
+            value: pack.price_cents / 100,
+            items: [{ item_id: pack.id, item_name: pack.name }],
+          });
+        }
         window.location.href = data.checkout_url;
       } else {
         setMessage(data.detail || "Demande enregistrée — contactez-nous pour connaître les modalités de paiement.");
