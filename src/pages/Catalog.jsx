@@ -416,6 +416,7 @@ export default function Catalog() {
               <option value="pro">Bac Professionnel</option>
               <option value="fle">FLE — Français Langue Étrangère</option>
               <option value="fls">FLS — Français Langue Seconde</option>
+              <option value="brevet">Brevet — Collège</option>
             </select>
             <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "-8px 0 14px" }}>
               Créez un compte pour affiner selon vos spécialités précises.
@@ -457,12 +458,13 @@ export default function Catalog() {
           </select>
         )}
 
-        {effectiveBacType !== "fle" && effectiveBacType !== "fls" && (
+        {effectiveBacType !== "fle" && effectiveBacType !== "fls" && effectiveBacType !== "brevet" && (
           <>
             <label style={{ fontSize: 12, color: "var(--text-secondary)", display: "block", marginBottom: 4 }}>
               Niveau
             </label>
             <select value={level} onChange={(e) => setLevel(e.target.value)} style={{ marginBottom: 20 }}>
+              <option value="2nde">Seconde</option>
               <option value="1ere">1ère</option>
               <option value="terminale">Terminale</option>
             </select>

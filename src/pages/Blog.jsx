@@ -2,13 +2,18 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import Skeleton from "../components/Skeleton";
+import { useSeoMeta } from "../utils/seo";
 
 export default function Blog() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  useSeoMeta({
+    title: "Blog",
+    description: "Conseils, méthodes et actualités pour réussir le baccalauréat français, en France comme à l'étranger — par l'équipe KLASSX.",
+  });
+
   useEffect(() => {
-    document.title = "Blog — KLASSX";
     api
       .blogPosts()
       .then((data) => setPosts(data.results || data))

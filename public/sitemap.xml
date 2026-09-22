@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sitemap statique des pages principales. Les pages individuelles
+  (chaque article de blog /blog/:slug, chaque fiche enseignant
+  /nos-enseignants/:id) ne sont pas listées ici car elles sont générées
+  dynamiquement depuis la base de données — à ajouter manuellement ici
+  au fur et à mesure, ou à automatiser plus tard côté backend.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://klassx.cloud/</loc>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://klassx.cloud/packs</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://klassx.cloud/nos-enseignants</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://klassx.cloud/catalogue</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://klassx.cloud/blog</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://klassx.cloud/a-propos</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://klassx.cloud/forum</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://klassx.cloud/mentions-legales</loc>
+    <priority>0.2</priority>
+  </url>
+  <url>
+    <loc>https://klassx.cloud/cgv</loc>
+    <priority>0.2</priority>
+  </url>
+  <url>
+    <loc>https://klassx.cloud/confidentialite</loc>
+    <priority>0.2</priority>
+  </url>
+</urlset>

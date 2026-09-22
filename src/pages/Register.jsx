@@ -15,6 +15,7 @@ const BAC_TYPES = [
   { value: "pro", label: "Professionnel" },
   { value: "fle", label: "FLE — Français Langue Étrangère" },
   { value: "fls", label: "FLS — Français Langue Seconde" },
+  { value: "brevet", label: "Brevet — Collège" },
 ];
 const CECRL_LEVELS = [
   { value: "A1", label: "A1 — Découverte" },
@@ -44,6 +45,7 @@ export default function Register() {
     bac_type: "general",
     grade_level: "1ere",
     cecrl_level: "",
+    candidate_type: "standard",
     bio: "",
     date_of_birth: "",
     parent_full_name: "",
@@ -72,6 +74,7 @@ export default function Register() {
   // FLE/FLS : ni Première/Terminale ni spécialités, un niveau CECRL à la
   // place (voir backend BacType.FLE/FLS et StudentProfile.cecrl_level).
   const isFleFls = form.bac_type === "fle" || form.bac_type === "fls";
+  const isBrevet = form.bac_type === "brevet";
   // Maths Expertes / Maths Complémentaires — Terminale uniquement, pas une
   // 3e spécialité (voir backend Subject.SubjectType.MATH_OPTION). Expertes
   // n'a de sens que si Mathématiques fait partie des spécialités gardées
@@ -159,11 +162,12 @@ export default function Register() {
           : {
               ...basePayload,
               bac_type: form.bac_type,
-              grade_level: isFleFls ? undefined : form.grade_level,
+              grade_level: isFleFls || isBrevet ? undefined : form.grade_level,
               cecrl_level: isFleFls ? form.cecrl_level : "",
               premiere_specialties: form.bac_type === "general" ? premiereSpecialties : [],
               terminale_specialties: form.bac_type === "general" ? terminaleSpecialties : [],
               terminale_math_option: form.bac_type === "general" ? terminaleMathOption : null,
+              candidate_type: form.candidate_type,
               date_of_birth: form.date_of_birth,
               ...(isMinor ? { parent_full_name: form.parent_full_name } : {}),
             };
@@ -304,7 +308,7 @@ export default function Register() {
             <select style={{ flex: 1 }} value={form.bac_type} onChange={(e) => update("bac_type", e.target.value)}>
               {BAC_TYPES.map((b) => (
                 <option key={b.value} value={b.value}>
-                  {b.value === "fle" || b.value === "fls" ? b.label : `Bac ${b.label}`}
+                  {b.value === "fle" || b.value === "fls" || b.value === "brevet" ? b.label : `Bac ${b.label}`}
                 </option>
               ))}
             </select>
@@ -324,8 +328,9 @@ export default function Register() {
                   </option>
                 ))}
               </select>
-            ) : (
+            ) : isBrevet ? null : (
               <select style={{ flex: 1 }} value={form.grade_level} onChange={(e) => update("grade_level", e.target.value)}>
+                <option value="2nde">Seconde</option>
                 <option value="1ere">1ère</option>
                 <option value="terminale">Terminale</option>
               </select>
@@ -333,7 +338,18 @@ export default function Register() {
           </div>
         )}
 
-        {accountType === "student" && form.bac_type === "general" && specialtySubjects.length > 0 && (
+        {accountType === "student" && (
+          <select
+            style={{ width: "100%", marginBottom: 14 }}
+            value={form.candidate_type}
+            onChange={(e) => update("candidate_type", e.target.value)}
+          >
+            <option value="standard">Scolarisé (dans un établissement)</option>
+            <option value="candidat_libre">Candidat libre</option>
+          </select>
+        )}
+
+        {accountType === "student" && form.bac_type === "general" && form.grade_level !== "2nde" && specialtySubjects.length > 0 && (
           <>
             <p style={{ fontSize: 13, fontWeight: 600, margin: "0 0 4px" }}>
               Spécialités 1ère <span style={{ fontWeight: 400, color: "var(--text-muted)" }}>(max {MAX_PREMIERE})</span>

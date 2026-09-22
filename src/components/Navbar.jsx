@@ -55,6 +55,9 @@ export default function Navbar() {
           <Link to="/packs" style={linkStyle}>
             Nos Packs
           </Link>
+          <Link to="/promos" style={linkStyle}>
+            Promos
+          </Link>
           <Link to="/forum" style={linkStyle}>
             Forum
           </Link>
@@ -161,6 +164,9 @@ export default function Navbar() {
           </Link>
           <Link to="/packs" onClick={closeMenu} style={{ ...linkStyle, padding: "10px 4px" }}>
             Nos Packs
+          </Link>
+          <Link to="/promos" onClick={closeMenu} style={{ ...linkStyle, padding: "10px 4px" }}>
+            Promos
           </Link>
           <Link to="/forum" onClick={closeMenu} style={{ ...linkStyle, padding: "10px 4px" }}>
             Forum

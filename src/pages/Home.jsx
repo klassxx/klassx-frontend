@@ -109,7 +109,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- Bannière : séance d'information gratuite --- */}
+      {/* --- Bannière condensée : renvoie vers /promos --- */}
       <section className="container" style={{ paddingTop: "2rem" }}>
         <div
           className="card"
@@ -120,58 +120,15 @@ export default function Home() {
         >
           <div>
             <p style={{ fontSize: 12, fontWeight: 700, color: "var(--accent-text)", margin: "0 0 4px", textTransform: "uppercase" }}>
-              Gratuit · Mardi 22 septembre · 19h
+              🎁 Offres de rentrée en cours
             </p>
             <p style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>
-              Séance d'information : bien préparer l'épreuve de maths du bac
+              Mois offert, rabais sur plusieurs matières, séances de bienvenue à tarif réduit
             </p>
           </div>
-          <Link to="/seance-info" className="btn-accent" style={{ display: "inline-block", padding: "10px 20px", whiteSpace: "nowrap" }}>
-            Je m'inscris
+          <Link to="/promos" className="btn-accent" style={{ display: "inline-block", padding: "10px 20px", whiteSpace: "nowrap" }}>
+            Voir les offres
           </Link>
-        </div>
-      </section>
-
-      {/* --- Offre : 1 mois gratuit de Maths --- */}
-      <section className="container" style={{ paddingTop: "2rem" }}>
-        <div
-          className="card"
-          style={{
-            textAlign: "center", background: "var(--accent-soft, #FFF4E5)",
-            border: "1px solid var(--accent, #E8A33D)", padding: "24px 20px",
-          }}
-        >
-          <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--accent)", margin: "0 0 6px" }}>
-            🎁 Offre de rentrée — jusqu'au 30 octobre 2026
-          </p>
-          <p style={{ fontSize: 18, fontWeight: 600, margin: "0 0 6px" }}>
-            1 forfait de groupe acheté = 1 mois de Maths offert
-          </p>
-          <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}>
-            Même formule (taille de groupe et heures/mois) que votre forfait acheté, valable dès que votre groupe
-            est constitué et votre premier mois facturé — contactez-nous à ce moment pour recevoir votre code.
-          </p>
-        </div>
-      </section>
-
-      {/* --- Offre : -50% Maths et Espagnol (code promo) --- */}
-      <section className="container" style={{ paddingTop: "1.5rem" }}>
-        <div
-          className="card"
-          style={{
-            textAlign: "center", background: "var(--accent-soft, #FFF4E5)",
-            border: "1px solid var(--accent, #E8A33D)", padding: "24px 20px",
-          }}
-        >
-          <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--accent)", margin: "0 0 6px" }}>
-            🎁 Offre spéciale — valable jusqu'au 15 octobre 2026
-          </p>
-          <p style={{ fontSize: 18, fontWeight: 600, margin: "0 0 6px" }}>
-            -50% sur les cours de Maths et d'Espagnol, pendant 1 mois
-          </p>
-          <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}>
-            Avec le code promo <strong>KLASSX</strong>, à saisir au moment du paiement.
-          </p>
         </div>
       </section>
 

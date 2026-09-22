@@ -235,6 +235,18 @@
     box-shadow:0 1px 0 rgba(0,0,0,.08);
     overflow:hidden;
   }
+  /* Format vertical : le cadre garde un vrai ratio 9:16 (ni étiré ni
+     déformé), centré dans l'espace disponible — voir toggleVerticalMode(). */
+  .board-area.vertical{
+    background:#111;
+  }
+  .board-area.vertical .board-frame{
+    width:auto;
+    height:100%;
+    aspect-ratio:9/16;
+    max-width:100%;
+    margin:0 auto;
+  }
   canvas{
     display:block;
     width:100%;
@@ -381,6 +393,9 @@
     </button>
     <button class="icon-btn" id="cam-btn" title="Activer/désactiver ma caméra">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>
+    </button>
+    <button class="icon-btn" id="vertical-btn" title="Format vertical (plein écran, enregistrement 9:16)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>
     </button>
     <button class="rec-btn" id="live-btn" title="Démarrer ou rejoindre une session en direct">
       <span style="width:9px;height:9px;border-radius:50%;background:var(--status-green);display:inline-block;"></span>
@@ -994,6 +1009,123 @@
     liveRefreshOutgoingMedia();
   }
   camBtn.addEventListener('click', toggleCamera);
+
+  /* ---------- format vertical (plein écran + enregistrement 9:16) ---------- */
+  const verticalBtn = document.getElementById('vertical-btn');
+  const boardAreaEl = document.querySelector('.board-area');
+  let verticalMode = false;
+  const LANDSCAPE_SIZE = { w: 1280, h: 720 };
+  const PORTRAIT_SIZE = { w: 720, h: 1280 };
+
+  function redrawCanvasAtNewSize(newW, newH){
+    // Sauvegarde le dessin actuel puis le redessine centré dans la
+    // nouvelle taille de canvas, à l'échelle, sans le déformer — pour ne
+    // rien perdre du contenu déjà tracé en changeant de format.
+    const snapshot = document.createElement('canvas');
+    snapshot.width = canvas.width;
+    snapshot.height = canvas.height;
+    snapshot.getContext('2d').drawImage(canvas, 0, 0);
+
+    canvas.width = newW;
+    canvas.height = newH;
+
+    const scale = Math.min(newW / snapshot.width, newH / snapshot.height);
+    const drawW = snapshot.width * scale;
+    const drawH = snapshot.height * scale;
+    const offsetX = (newW - drawW) / 2;
+    const offsetY = (newH - drawH) / 2;
+
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = getComputedStyle(canvas).backgroundColor || '#fff';
+    ctx.drawImage(snapshot, offsetX, offsetY, drawW, drawH);
+  }
+
+  async function toggleVerticalMode(){
+    verticalMode = !verticalMode;
+    const size = verticalMode ? PORTRAIT_SIZE : LANDSCAPE_SIZE;
+    redrawCanvasAtNewSize(size.w, size.h);
+    boardAreaEl.classList.toggle('vertical', verticalMode);
+    verticalBtn.classList.toggle('active', verticalMode);
+
+    try{
+      if(verticalMode){
+        if(document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
+      } else if(document.fullscreenElement){
+        await document.exitFullscreen();
+      }
+    }catch(err){
+      // Le plein écran peut être refusé par le navigateur (ex: iframe sans
+      // permission) — le format vertical du canvas reste appliqué même si
+      // le plein écran échoue, seul le confort visuel est réduit.
+      showToast("Format vertical activé — le plein écran n'a pas pu s'ouvrir sur cet appareil.");
+    }
+  }
+  verticalBtn.addEventListener('click', toggleVerticalMode);
+
+  // Si l'utilisateur quitte le plein écran autrement (touche Échap...),
+  // on resynchronise le bouton et le format sur l'état réel.
+  document.addEventListener('fullscreenchange', ()=>{
+    if(!document.fullscreenElement && verticalMode){
+      verticalMode = false;
+      redrawCanvasAtNewSize(LANDSCAPE_SIZE.w, LANDSCAPE_SIZE.h);
+      boardAreaEl.classList.remove('vertical');
+      verticalBtn.classList.remove('active');
+    }
+  });
+
+  /* ---------- camera (PiP) : déplacement au doigt/souris ---------- */
+  (function enableCamDrag(){
+    let dragging = false, offsetX = 0, offsetY = 0;
+
+    function clamp(val, min, max){ return Math.max(min, Math.min(max, val)); }
+
+    // Passe d'un positionnement bottom/right (fixe au démarrage) à left/top
+    // (librement déplaçable), une seule fois, sans faire "sauter" la caméra.
+    function toLeftTop(){
+      if (camPip.dataset.converted) return;
+      const rect = camPip.getBoundingClientRect();
+      const parentRect = camPip.offsetParent.getBoundingClientRect();
+      camPip.style.left = (rect.left - parentRect.left) + 'px';
+      camPip.style.top = (rect.top - parentRect.top) + 'px';
+      camPip.style.right = 'auto';
+      camPip.style.bottom = 'auto';
+      camPip.dataset.converted = '1';
+    }
+
+    function onPointerDown(e){
+      toLeftTop();
+      dragging = true;
+      const rect = camPip.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      camPip.setPointerCapture(e.pointerId);
+    }
+
+    function onPointerMove(e){
+      if (!dragging) return;
+      const parentRect = camPip.offsetParent.getBoundingClientRect();
+      let newLeft = e.clientX - parentRect.left - offsetX;
+      let newTop = e.clientY - parentRect.top - offsetY;
+      newLeft = clamp(newLeft, 0, parentRect.width - camPip.offsetWidth);
+      newTop = clamp(newTop, 0, parentRect.height - camPip.offsetHeight);
+      camPip.style.left = newLeft + 'px';
+      camPip.style.top = newTop + 'px';
+    }
+
+    function onPointerUp(e){
+      dragging = false;
+      try { camPip.releasePointerCapture(e.pointerId); } catch(err){}
+    }
+
+    camPip.style.cursor = 'grab';
+    // Empêche la page/le tableau de défiler ou de dessiner pendant qu'on
+    // déplace la caméra au doigt sur tablette/mobile.
+    camPip.style.touchAction = 'none';
+    camPip.addEventListener('pointerdown', onPointerDown);
+    camPip.addEventListener('pointermove', onPointerMove);
+    camPip.addEventListener('pointerup', onPointerUp);
+    camPip.addEventListener('pointercancel', onPointerUp);
+  })();
 
   function roundRectPath(c, x, y, w, h, r){
     c.beginPath();

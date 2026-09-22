@@ -120,8 +120,8 @@ export const api = {
   blogPosts: () => apiFetch("/public/blog/"),
   blogPost: (slug) => apiFetch(`/public/blog/${slug}/`),
   subscribeNewsletter: (email) => apiFetch("/public/newsletter/", { method: "POST", body: { email } }),
-  signupInfoSession: (name, email, sessionDate) =>
-    apiFetch("/public/seance-info/", { method: "POST", body: { name, email, session_date: sessionDate } }),
+  signupInfoSession: (name, email, country, sessionDate) =>
+    apiFetch("/public/seance-info/", { method: "POST", body: { name, email, country, session_date: sessionDate } }),
   validatePromoCode: (code) => apiFetch("/public/promo-codes/validate/", { method: "POST", body: { code } }),
   me: () => apiFetch("/me/"),
   myReferrals: () => apiFetch("/me/referrals/"),

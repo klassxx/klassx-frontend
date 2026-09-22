@@ -12,6 +12,7 @@ import Whiteboard from "./pages/Whiteboard";
 import Blog from "./pages/Blog";
 import Packs from "./pages/Packs";
 import InfoSession from "./pages/InfoSession";
+import Promos from "./pages/Promos";
 import BlogPostPage from "./pages/BlogPostPage";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -50,6 +51,7 @@ export default function App() {
           <Route path="/blog" element={<Blog />} />
           <Route path="/packs" element={<Packs />} />
           <Route path="/seance-info" element={<InfoSession />} />
+          <Route path="/promos" element={<Promos />} />
           <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route
             path="/chat-enseignant"

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "../api/client";
 
 // Séance du mardi 22 septembre 2026, 19h (heure de Paris), durée 1h.
@@ -8,19 +8,30 @@ const SESSION_TIME = "19h00";
 const SESSION_DURATION = "1h";
 const SESSION_DATE_ISO = "2026-09-22"; // envoyé au backend, format YYYY-MM-DD
 
+const COUNTRY_OPTIONS = [
+  "France", "Tunisie", "Maroc", "Algérie", "Canada", "Belgique", "Suisse",
+  "Émirats arabes unis", "Qatar", "Arabie saoudite", "Koweït", "Liban",
+  "Sénégal", "Côte d'Ivoire", "Autre",
+];
+
 export default function InfoSession() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [country, setCountry] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    document.title = "Séance d'information gratuite — KLASSX";
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
     setSubmitting(true);
     try {
-      await api.signupInfoSession(name, email, SESSION_DATE_ISO);
+      await api.signupInfoSession(name, email, country, SESSION_DATE_ISO);
       setDone(true);
     } catch (err) {
       setError(err.message || "L'inscription a échoué. Réessayez dans un instant.");
@@ -105,6 +116,25 @@ export default function InfoSession() {
               onChange={(e) => setEmail(e.target.value)}
               style={{ width: "100%", marginBottom: 16 }}
             />
+
+            <label style={{ display: "block", fontSize: 13, fontWeight: 500, marginBottom: 6 }}>
+              Pays de résidence
+            </label>
+            <select
+              required
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              style={{ width: "100%", marginBottom: 16 }}
+            >
+              <option value="" disabled>
+                Choisir un pays
+              </option>
+              {COUNTRY_OPTIONS.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
 
             {error && <p style={{ fontSize: 13, color: "#B3261E", margin: "0 0 12px" }}>{error}</p>}
 

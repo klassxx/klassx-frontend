@@ -5,6 +5,7 @@ import { useAuth } from "../api/AuthContext";
 import Skeleton from "../components/Skeleton";
 import PaymentTrustBadge from "../components/PaymentTrustBadge";
 import TunisiaPaymentNote from "../components/TunisiaPaymentNote";
+import { useSeoMeta } from "../utils/seo";
 
 export default function Packs() {
   const [packs, setPacks] = useState([]);
@@ -14,8 +15,12 @@ export default function Packs() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  useSeoMeta({
+    title: "Nos Packs",
+    description: "Découvrez les forfaits KLASSX pour préparer le Bac français en visio, où que vous soyez dans le monde — cours particuliers et en petits groupes, avec des enseignants qualifiés.",
+  });
+
   useEffect(() => {
-    document.title = "Nos Packs — KLASSX";
     api
       .packs()
       .then((data) => setPacks(data.results || data))
