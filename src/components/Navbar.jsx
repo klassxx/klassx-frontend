@@ -58,6 +58,9 @@ export default function Navbar() {
           <Link to="/promos" style={linkStyle}>
             Promos
           </Link>
+          <Link to="/seance-info" style={linkStyle}>
+            Séances gratuites
+          </Link>
           <Link to="/forum" style={linkStyle}>
             Forum
           </Link>
@@ -167,6 +170,9 @@ export default function Navbar() {
           </Link>
           <Link to="/promos" onClick={closeMenu} style={{ ...linkStyle, padding: "10px 4px" }}>
             Promos
+          </Link>
+          <Link to="/seance-info" onClick={closeMenu} style={{ ...linkStyle, padding: "10px 4px" }}>
+            Séances gratuites
           </Link>
           <Link to="/forum" onClick={closeMenu} style={{ ...linkStyle, padding: "10px 4px" }}>
             Forum

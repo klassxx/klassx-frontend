@@ -132,6 +132,28 @@ export default function Home() {
         </div>
       </section>
 
+      {/* --- Séances gratuites de maths --- */}
+      <section className="container" style={{ paddingTop: "1rem" }}>
+        <div
+          className="card"
+          style={{
+            display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 16,
+          }}
+        >
+          <div>
+            <p style={{ fontSize: 12, fontWeight: 700, color: "var(--accent-text)", margin: "0 0 4px", textTransform: "uppercase" }}>
+              Séances gratuites de maths
+            </p>
+            <p style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>
+              Terminale Spé : mardi 3 novembre · Première Spé : mercredi 4 novembre, à 19h (heure de Paris)
+            </p>
+          </div>
+          <Link to="/seance-info" className="btn-accent" style={{ display: "inline-block", padding: "10px 20px", whiteSpace: "nowrap" }}>
+            Réserver ma place
+          </Link>
+        </div>
+      </section>
+
       {/* --- Matières disponibles --- */}
       {/* Fond blanc pur, en rupture avec le crème de la bannière au-dessus
           — évite l'effet "tout se fond ensemble" repéré visuellement. */}
