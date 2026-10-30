@@ -9,7 +9,7 @@ const PROMOS = [
       "Même formule (taille de groupe et heures/mois) que votre forfait acheté, valable dès que votre groupe est constitué et votre premier mois facturé — contactez-nous à ce moment pour recevoir votre code.",
   },
   {
-    badge: "🎁 Offre spéciale — valable jusqu'au 15 octobre 2026",
+    badge: "🎁 Offre spéciale — valable jusqu'au 15 novembre 2026",
     title: "-50% sur les cours d'Espagnol, pendant 1 mois",
     description: "Avec le code promo KLASSX, à saisir au moment du paiement.",
   },

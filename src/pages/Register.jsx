@@ -65,6 +65,16 @@ export default function Register() {
       .catch(() => {});
   }, []);
 
+  // La Seconde n'existe pas comme choix propre à "Technologique" (voir le
+  // select de niveau plus bas) — si l'élève bascule vers Technologique alors
+  // qu'il avait Seconde sélectionné, on retombe sur 1ère par défaut plutôt
+  // que de laisser une combinaison qui n'existe pas dans la réalité.
+  useEffect(() => {
+    if (form.bac_type === "techno" && form.grade_level === "2nde") {
+      update("grade_level", "1ere");
+    }
+  }, [form.bac_type]);
+
   // Specialty picking only applies to Bac Général — Technologique/
   // Professionnel students follow a fixed curriculum for their série/
   // filière instead (see backend core/models.py: StudentProfile.bac_type).
@@ -330,7 +340,11 @@ export default function Register() {
               </select>
             ) : isBrevet ? null : (
               <select style={{ flex: 1 }} value={form.grade_level} onChange={(e) => update("grade_level", e.target.value)}>
-                <option value="2nde">Seconde</option>
+                {/* La Seconde est commune à toutes les filières générales/techno (le choix ne se
+                    fait qu'en entrant en Première) — on ne la propose donc pas pour "Technologique"
+                    spécifiquement, seulement pour "Général" (par défaut) et "Professionnel"
+                    (Seconde Pro existe bien, elle, dès le départ). */}
+                {form.bac_type !== "techno" && <option value="2nde">Seconde</option>}
                 <option value="1ere">1ère</option>
                 <option value="terminale">Terminale</option>
               </select>

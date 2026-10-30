@@ -160,6 +160,9 @@ export default function Home() {
           <SubjectBadge icon="📊" label="SES" />
           <SubjectBadge icon="🎤" label="Grand Oral" />
         </div>
+        <p style={{ fontSize: 13, color: "var(--text-secondary)", textAlign: "center", marginTop: 16 }}>
+          Nous préparons aussi au <strong>Brevet</strong> et à la <strong>Seconde</strong> — <Link to="/catalogue">voir le catalogue complet</Link>
+        </p>
       </section>
       </div>
 
@@ -332,7 +335,11 @@ export default function Home() {
       {/* --- Nos enseignants experts --- */}
       {teachers.length > 0 && (
         <section className="container">
-          <SectionHeading eyebrow="L'équipe" title="Nos enseignants experts" />
+          <SectionHeading
+            eyebrow="L'équipe"
+            title="Une équipe qualifiée, formée par l'Éducation nationale"
+            subtitle="Notre équipe compte des enseignants agrégés, des titulaires de doctorat, et des professeurs ayant enseigné dans l'Éducation nationale."
+          />
           <p style={{ fontSize: 14, fontWeight: 600, color: "var(--accent)", margin: "0 0 16px" }}>
             ✅ Tous nos enseignants sont 100% vérifiés
           </p>
@@ -402,7 +409,7 @@ export default function Home() {
   );
 }
 
-function SectionHeading({ eyebrow, title }) {
+function SectionHeading({ eyebrow, title, subtitle }) {
   return (
     <div style={{ textAlign: "center", marginBottom: 32 }}>
       <p
@@ -417,7 +424,10 @@ function SectionHeading({ eyebrow, title }) {
       >
         {eyebrow}
       </p>
-      <h2 style={{ fontSize: 26, fontWeight: 600, margin: 0 }}>{title}</h2>
+      <h2 style={{ fontSize: 26, fontWeight: 600, margin: subtitle ? "0 0 10px" : 0 }}>{title}</h2>
+      {subtitle && (
+        <p style={{ fontSize: 15, color: "var(--text-secondary)", maxWidth: 560, margin: "0 auto" }}>{subtitle}</p>
+      )}
     </div>
   );
 }

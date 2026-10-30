@@ -197,6 +197,16 @@ export default function Catalog() {
   // we fall back to the same no-gate behavior as Techno/Pro — just
   // filtered by the bac type they're browsing as (browsingBacType).
   const effectiveBacType = profile?.bac_type || browsingBacType;
+
+  // Même logique que Register.jsx : si on bascule vers "Technologique" alors
+  // que "Seconde" était sélectionné, on retombe sur 1ère (combinaison qui
+  // n'existe pas dans la réalité, voir le select de niveau plus bas).
+  useEffect(() => {
+    if (effectiveBacType === "techno" && level === "2nde") {
+      setLevel("1ere");
+    }
+  }, [effectiveBacType]);
+
   const availableSubjects = subjects.filter((s) => {
     if (s.level !== "both" && s.level !== level) return false;
     if (s.bac_type !== effectiveBacType) return false;
@@ -464,7 +474,10 @@ export default function Catalog() {
               Niveau
             </label>
             <select value={level} onChange={(e) => setLevel(e.target.value)} style={{ marginBottom: 20 }}>
-              <option value="2nde">Seconde</option>
+              {/* Comme dans Register.jsx : la Seconde est commune à Général/Techno dans la
+                  réalité (le choix ne se fait qu'en Première) — on ne la propose donc pas
+                  spécifiquement sous "Technologique". */}
+              {effectiveBacType !== "techno" && <option value="2nde">Seconde</option>}
               <option value="1ere">1ère</option>
               <option value="terminale">Terminale</option>
             </select>

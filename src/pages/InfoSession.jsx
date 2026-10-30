@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
 
-// Séance du mardi 22 septembre 2026, 19h (heure de Paris), durée 1h.
-// À mettre à jour manuellement pour chaque nouvelle séance.
-const SESSION_LABEL = "Mardi 22 septembre";
+// Séances gratuites, 19h (heure de Paris), durée 1h.
+// À mettre à jour manuellement pour chaque nouvelle série de séances.
 const SESSION_TIME = "19h00";
 const SESSION_DURATION = "1h";
-const SESSION_DATE_ISO = "2026-09-22"; // envoyé au backend, format YYYY-MM-DD
+const SESSIONS = [
+  { id: "terminale", level: "Terminale Spécialité Maths", label: "Mardi 3 novembre", iso: "2026-11-03" },
+  { id: "premiere", level: "Première Spécialité Maths", label: "Mercredi 4 novembre", iso: "2026-11-04" },
+];
 
 const COUNTRY_OPTIONS = [
   "France", "Tunisie", "Maroc", "Algérie", "Canada", "Belgique", "Suisse",
@@ -18,6 +20,8 @@ export default function InfoSession() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [country, setCountry] = useState("");
+  const [sessionId, setSessionId] = useState(SESSIONS[0].id);
+  const session = SESSIONS.find((x) => x.id === sessionId) || SESSIONS[0];
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
@@ -31,7 +35,7 @@ export default function InfoSession() {
     setError("");
     setSubmitting(true);
     try {
-      await api.signupInfoSession(name, email, country, SESSION_DATE_ISO);
+      await api.signupInfoSession(name, email, country, session.iso);
       setDone(true);
     } catch (err) {
       setError(err.message || "L'inscription a échoué. Réessayez dans un instant.");
@@ -53,19 +57,16 @@ export default function InfoSession() {
         peut aider.
       </p>
 
-      <div className="card-row card" style={{ marginBottom: 28, gap: 24 }}>
-        <div>
-          <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Date</div>
-          <div style={{ fontSize: 16, fontWeight: 600 }}>{SESSION_LABEL}</div>
+      <div className="card" style={{ marginBottom: 28 }}>
+        <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>
+          Deux séances gratuites — {SESSION_TIME} (heure de Paris), {SESSION_DURATION}
         </div>
-        <div>
-          <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Heure (Paris)</div>
-          <div style={{ fontSize: 16, fontWeight: 600 }}>{SESSION_TIME}</div>
-        </div>
-        <div>
-          <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Durée</div>
-          <div style={{ fontSize: 16, fontWeight: 600 }}>{SESSION_DURATION}</div>
-        </div>
+        {SESSIONS.map((x) => (
+          <div key={x.id} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "6px 0" }}>
+            <span style={{ fontSize: 16, fontWeight: 600 }}>{x.label}</span>
+            <span style={{ fontSize: 14, color: "var(--text-secondary)" }}>{x.level}</span>
+          </div>
+        ))}
       </div>
 
       <div className="card" style={{ marginBottom: 28 }}>
@@ -94,6 +95,21 @@ export default function InfoSession() {
         {!done ? (
           <form onSubmit={handleSubmit}>
             <h2 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 14px" }}>Réserver sa place</h2>
+
+            <label style={{ display: "block", fontSize: 13, fontWeight: 500, marginBottom: 6 }}>
+              Séance
+            </label>
+            <select
+              value={sessionId}
+              onChange={(e) => setSessionId(e.target.value)}
+              style={{ width: "100%", marginBottom: 16 }}
+            >
+              {SESSIONS.map((x) => (
+                <option key={x.id} value={x.id}>
+                  {x.label} — {x.level}
+                </option>
+              ))}
+            </select>
 
             <label style={{ display: "block", fontSize: 13, fontWeight: 500, marginBottom: 6 }}>
               Prénom et nom
@@ -150,7 +166,7 @@ export default function InfoSession() {
             <p style={{ fontSize: 18, fontWeight: 600, margin: "0 0 8px" }}>C'est noté !</p>
             <p style={{ fontSize: 14, color: "var(--text-secondary)", margin: 0 }}>
               Un email de confirmation vient de vous être envoyé, avec le lien pour rejoindre la séance le{" "}
-              {SESSION_LABEL.toLowerCase()} à {SESSION_TIME}, pour {SESSION_DURATION}.
+              {session.label.toLowerCase()} à {SESSION_TIME}, pour {SESSION_DURATION}.
             </p>
           </div>
         )}
